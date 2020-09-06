@@ -1,0 +1,49 @@
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+  overflow: scroll;
+  background-color: #105868;
+}
+
+/* #container {
+  position: relative;
+  width: 800px;
+  height: 640px;
+  margin: 20px;
+  padding-top: 75%;
+  background-color: grey;
+} */
+
+#gamegrid {
+  position: relative;
+  margin: 20px;
+  width: 110vh;
+  height: 88vh;
+  background-color: white;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr;
+  z-index: 1;
+}
+
+.square {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #999;
+  justify-content: center;
+  align-content: center;
+  z-index: 2;
+}
+
+#qb {
+  position: absolute;
+  background-repeat: no-repeat;
+  background-size: cover; /* Resize the background image to cover the entire container */
+  background-color: red;
+  /* transform: rotate(90deg); */
+  transition: all 1s ease;
+  z-index: 3;
+}
