@@ -2,6 +2,7 @@
 let grid;
 let qb = document.getElementById("qb");
 let qbObj = { icon: "url('templates/images/nqb-icon.png')", dimension: 0, currPos: 0, newPos: 0, orientation: 0 };
+let commandList = [];
 
 const getDimension = () => {
     const dimension = grid.clientHeight / 5;
@@ -22,10 +23,7 @@ const gridSetup = (grid) => {
 }
 
 const qbSetup = (grid, dimension) => {
-    // const qb = document.getElementById("qb");
-
-    // qb.setAttribute("id", "qb");
-    qb.setAttribute("style", `width: ${dimension}px; height: ${dimension}px; background-image:${qbObj.icon}`);
+    qb.setAttribute("style", `width: ${dimension}px; height: ${dimension}px; background-image:${qbObj.icon}; top: ${dimension * 4}px`);
     grid.appendChild(qb);
 }
 
@@ -35,29 +33,48 @@ const qbResize = () => {
     console.log('qbObj: ', qbObj);
 }
 
-const turn90 = (orientation) => {
-
+const turn90 = (direction) => {
+    if (direction === "+") {
+        qbObj.orientation += 90;
+    }
+    if (direction === "-") {
+        qbObj.orientation -= 90;
+    }
+    qb.style.transform = `rotate(${qbObj.orientation}deg)`;
+    console.log('qbObj.orientation: ', qbObj.orientation);
 }
 
-const forward = (intVal) => {
+const goRight = (comm) => {
     if (qbObj.currPos >= qbObj.newPos) {
-        clearInterval(intVal);
+        clearInterval(comm);
     } else {
         qbObj.currPos++;
         qb.style.left = `${qbObj.currPos}px`;
     }
 }
 
-// const intVal = setInterval(forward, 15);
+const goForward = (comm) => {
+    if (qbObj.currPos >= qbObj.newPos) {
+        clearInterval(comm);
+    } else {
+        qbObj.currPos++;
+        qb.style.top = `${qbObj.currPos}px`;
+    }
+}
+
 
 const animQb = () => {
     console.log('animQb: clicked');
-    // const qb = document.getElementById("qb");
     const dimension = getDimension();
     qbObj.newPos = qbObj.currPos + dimension;
-    console.log('qbObj.newPos: ', qbObj.newPos);
-    const intVal = setInterval(forward, 15);
-    forward(intVal);
+    console.log('qbObj: ', qbObj);
+    // const turn = setInterval(turn90, 15);
+    const right = setInterval(goRight, 15);
+    // const forward = setInterval(goForward, 15);
+    turn90("-");
+    goRight(right);
+    turn90("+");
+    // goForward(forward);
     // switch (command) {
 
     //     case "forward":
