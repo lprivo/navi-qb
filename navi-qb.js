@@ -1,12 +1,19 @@
 
 let grid;
-let qb = document.getElementById("qb");
-let qbObj = { icon: "url('templates/images/nqb-icon.png')", dimension: 0, currPos: 0, newPos: 0, orientation: 0 };
-let commandList = [];
+let currDimension;
+let qbObj = { icon: "url('templates/images/nqb-icon.png')", dimension: 0, currTop: 0, newTop: 0, currLeft: 0, newLeft: 0, orientation: 0 };
+let commandList = ["+90", "forward", "right"];
+let history = [];
 
 const getDimension = () => {
     const dimension = grid.clientHeight / 5;
     return dimension;
+}
+
+const getNewDimension = () => {
+    const dimension = getDimension();
+    const newDimension = { dim: dimension, ratio: currDimension / dimension };
+    return newDimension;
 }
 
 const gridSetup = (grid) => {
@@ -22,117 +29,138 @@ const gridSetup = (grid) => {
     };
 }
 
-const qbSetup = (grid, dimension) => {
-    qb.setAttribute("style", `width: ${dimension}px; height: ${dimension}px; background-image:${qbObj.icon}; top: ${dimension * 4}px`);
-    grid.appendChild(qb);
+const qbSetup = (grid, dimension, object, elem) => {
+    // object.icon = ;
+    object.dimension = dimension;
+    object.currTop = dimension * 4;
+    elem.setAttribute("style", `width: ${dimension}px; height: ${dimension}px; background-image:${object.icon}; top: ${object.currTop}px`);
+    grid.appendChild(elem);
 }
 
-const qbResize = () => {
-    const dimension = getDimension();
-    qb.setAttribute("style", `width: ${dimension}px; height: ${dimension}px; background-image:${qbObj.icon}`);
-    console.log('qbObj: ', qbObj);
+const qbResize = (object, elem) => {
+    const dimension = getNewDimension();
+    const top = object.currTop / dimension.ratio;
+    const left = object.currLeft / dimension.ratio;
+    elem.setAttribute("style", `width: ${dimension.dim}px; height: ${dimension.dim}px; background-image:${object.icon};
+    top: ${top}px; left: ${left}px; transform: rotate(${object.orientation}deg)`);
+    currDimension = dimension.dim;
 }
 
-const turn90 = (direction) => {
+const turn90 = (direction, object, elem) => {
     if (direction === "+") {
-        qbObj.orientation += 90;
+        object.orientation += 90;
     }
     if (direction === "-") {
-        qbObj.orientation -= 90;
+        object.orientation -= 90;
     }
-    qb.style.transform = `rotate(${qbObj.orientation}deg)`;
-    console.log('qbObj.orientation: ', qbObj.orientation);
+    elem.style.transform = `rotate(${object.orientation}deg)`;
+    // console.log('object.orientation: ', object.orientation);
+    // return;
 }
 
-const goRight = (comm) => {
-    if (qbObj.currPos >= qbObj.newPos) {
+const goRight = (comm, object, elem) => {
+    if (object.currLeft >= object.newLeft) {
         clearInterval(comm);
     } else {
-        qbObj.currPos++;
-        qb.style.left = `${qbObj.currPos}px`;
+        object.currLeft++;
+        elem.style.left = `${object.currLeft}px`;
     }
+    // console.log('goRight: ', object.currLeft);
+    // return;
 }
-
-const goForward = (comm) => {
-    if (qbObj.currPos >= qbObj.newPos) {
+const goLeft = (comm, object, elem) => {
+    if (object.currLeft <= object.newLeft) {
         clearInterval(comm);
     } else {
-        qbObj.currPos++;
-        qb.style.top = `${qbObj.currPos}px`;
+        object.currLeft--;
+        elem.style.left = `${object.currLeft}px`;
     }
+    // console.log('goLeft: ', object.currLeft);
+    // return;
 }
 
+const goForward = (comm, object, elem) => {
+    if (object.currTop <= object.newTop) {
+        clearInterval(comm);
+    } else {
+        object.currTop--;
+        elem.style.top = `${object.currTop}px`;
+    }
+    // console.log('goForward: ', object.currTop);
+    // return;
+}
 
+const goBackward = (comm, object, elem) => {
+    if (object.currTop >= object.newTop) {
+        clearInterval(comm);
+    } else {
+        object.currTop++;
+        elem.style.top = `${object.currTop}px`;
+    }
+    // console.log('goBackward: ', object.currTop);
+    // return;
+}
+
+const getNextCommand = (item, dimension, object, elem) => {
+    let command;
+    if (item === "+90") {
+        // console.log('if: +90', object, elem);
+        command = turn90("+", object, elem);
+    }
+    if (item === "-90") {
+        // console.log('if: -90');
+        command = turn90("-", object, elem);
+    }
+    if (item === "right") {
+        // console.log('if: right');
+        object.newLeft = object.currLeft + dimension;
+        const right = setInterval(() => { goRight(right, object, elem) }, 15);
+        command = goRight(right, object, elem);
+    }
+    if (item === "left") {
+        // console.log('if: left');
+        object.newLeft = object.currLeft + dimension;
+        const left = setInterval(() => { goLeft(left, object, elem) }, 15);
+        command = goLeft(left, object, elem);
+    }
+    if (item === "forward") {
+        // console.log('if: forward');
+        object.newTop = object.currTop - dimension;
+        const forward = setInterval(() => { goForward(forward, object, elem) }, 15);
+        command = goForward(forward, object, elem);
+    }
+    if (item === "backward") {
+        // console.log('if: backward');
+        object.newTop = object.currTop + dimension;
+        const backward = setInterval(() => { goBackward(backward, object, elem) }, 15);
+        command = goBackward(backward, object, elem);
+    }
+    return command;
+}
 const animQb = () => {
-    console.log('animQb: clicked');
+    // console.log('animQb: clicked');
     const dimension = getDimension();
-    qbObj.newPos = qbObj.currPos + dimension;
+    const qb = document.getElementById("qb");
+
+    // (async () => {})();
+    for (const item of commandList) {
+        // console.log('i: ', item);
+        getNextCommand(item, dimension, qbObj, qb);
+    }
+
     console.log('qbObj: ', qbObj);
-    // const turn = setInterval(turn90, 15);
-    const right = setInterval(goRight, 15);
-    // const forward = setInterval(goForward, 15);
-    turn90("-");
-    goRight(right);
-    turn90("+");
-    // goForward(forward);
-    // switch (command) {
-
-    //     case "forward":
-    //         qbObj.newPos = qbObj.currPos + dimension;
-    //         forward();
-    //         break;
-    //     case "backward":
-
-    //         break;
-    //     case "left":
-
-    //         break;
-    //     case "right":
-
-    //         break;
-
-    //     default:
-    //         break;
-    // }
-    // const intVal = setInterval(forward, 15);
-
-    // const forward = () => {
-    //     // console.log('qbObj.currPos: ', qbObj.currPos);
-    //     if (qbObj.currPos >= qbObj.newPos) {
-    //         clearInterval(intVal);
-    //     } else {
-    //         qbObj.currPos++;
-    //         qb.style.left = `${qbObj.currPos}px`;
-    //     }
-    // }
 }
-
-// const animQb = () => {
-//     const qb = document.getElementById("qb");
-//     let pos = 0;
-//     let rotateAngle = 90;
-//     let dimension = 160;
-//     const forward = () => {
-//         if (pos == 160) {
-//             clearInterval(id);
-//         } else {
-//             pos++;
-//             // qb.style.top = `${pos}px`;
-//             qb.style.left = `${pos}px`;
-//             qb.style.transform = "rotate(90deg)";
-//         }
-//     }
-//     const id = setInterval(forward, 15);
-// };
 
 window.onload = () => {
     grid = document.getElementById("gamegrid");
-    qb = document.createElement("div");
+    const qb = document.createElement("div");
     qb.setAttribute("id", "qb");
-    qbObj.dimension = getDimension();
+    const dimension = getDimension();
+    qbObj.dimension = dimension;
+    currDimension = dimension;
 
     gridSetup(grid);
-    qbSetup(grid, getDimension());
+    qbSetup(grid, dimension, qbObj, qb);
+    addEventListener("resize", () => { qbResize(qbObj, qb) });
 }
 
-window.addEventListener("resize", qbResize);
