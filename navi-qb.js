@@ -1,11 +1,11 @@
 
-let grid;
 let currDimension;
 let qbObj = { icon: "url('templates/images/nqb-icon.png')", dimension: 0, currTop: 0, newTop: 0, currLeft: 0, newLeft: 0, orientation: 0 };
-let commandList = ["+90", "forward", "right"];
+let commandList = ["+90", "-90", "forward", "right"];
 let history = [];
 
 const getDimension = () => {
+    const grid = document.getElementById("gamegrid");
     const dimension = grid.clientHeight / 5;
     return dimension;
 }
@@ -54,8 +54,6 @@ const turn90 = (direction, object, elem) => {
         object.orientation -= 90;
     }
     elem.style.transform = `rotate(${object.orientation}deg)`;
-    // console.log('object.orientation: ', object.orientation);
-    // return;
 }
 
 const goRight = (comm, object, elem) => {
@@ -65,9 +63,8 @@ const goRight = (comm, object, elem) => {
         object.currLeft++;
         elem.style.left = `${object.currLeft}px`;
     }
-    // console.log('goRight: ', object.currLeft);
-    // return;
 }
+
 const goLeft = (comm, object, elem) => {
     if (object.currLeft <= object.newLeft) {
         clearInterval(comm);
@@ -75,8 +72,6 @@ const goLeft = (comm, object, elem) => {
         object.currLeft--;
         elem.style.left = `${object.currLeft}px`;
     }
-    // console.log('goLeft: ', object.currLeft);
-    // return;
 }
 
 const goForward = (comm, object, elem) => {
@@ -86,8 +81,6 @@ const goForward = (comm, object, elem) => {
         object.currTop--;
         elem.style.top = `${object.currTop}px`;
     }
-    // console.log('goForward: ', object.currTop);
-    // return;
 }
 
 const goBackward = (comm, object, elem) => {
@@ -97,40 +90,33 @@ const goBackward = (comm, object, elem) => {
         object.currTop++;
         elem.style.top = `${object.currTop}px`;
     }
-    // console.log('goBackward: ', object.currTop);
-    // return;
 }
 
 const getNextCommand = (item, dimension, object, elem) => {
     let command;
+
     if (item === "+90") {
-        // console.log('if: +90', object, elem);
         command = turn90("+", object, elem);
     }
     if (item === "-90") {
-        // console.log('if: -90');
         command = turn90("-", object, elem);
     }
     if (item === "right") {
-        // console.log('if: right');
         object.newLeft = object.currLeft + dimension;
         const right = setInterval(() => { goRight(right, object, elem) }, 15);
         command = goRight(right, object, elem);
     }
     if (item === "left") {
-        // console.log('if: left');
         object.newLeft = object.currLeft + dimension;
         const left = setInterval(() => { goLeft(left, object, elem) }, 15);
         command = goLeft(left, object, elem);
     }
     if (item === "forward") {
-        // console.log('if: forward');
         object.newTop = object.currTop - dimension;
         const forward = setInterval(() => { goForward(forward, object, elem) }, 15);
         command = goForward(forward, object, elem);
     }
     if (item === "backward") {
-        // console.log('if: backward');
         object.newTop = object.currTop + dimension;
         const backward = setInterval(() => { goBackward(backward, object, elem) }, 15);
         command = goBackward(backward, object, elem);
@@ -139,20 +125,24 @@ const getNextCommand = (item, dimension, object, elem) => {
 }
 const animQb = () => {
     // console.log('animQb: clicked');
-    const dimension = getDimension();
+    const grid = document.getElementById("gamegrid");
+    const dimension = getDimension(grid);
     const qb = document.getElementById("qb");
 
-    // (async () => {})();
-    for (const item of commandList) {
-        // console.log('i: ', item);
-        getNextCommand(item, dimension, qbObj, qb);
+    for (let i = 0; i < commandList.length; i++) {
+        const item = commandList[i];
+        (function (i) {         //Immediate Invoking Function Expression(IIFE)
+            setTimeout(function () {
+                console.log('i: ', i);
+                getNextCommand(item, dimension, qbObj, qb);
+            }, 3000 * i);
+        })(i);
     }
-
     console.log('qbObj: ', qbObj);
 }
 
 window.onload = () => {
-    grid = document.getElementById("gamegrid");
+    const grid = document.getElementById("gamegrid");
     const qb = document.createElement("div");
     qb.setAttribute("id", "qb");
     const dimension = getDimension();
