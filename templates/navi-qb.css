@@ -8,25 +8,31 @@ body {
   background-color: #105868;
 }
 
-/* #container {
+#container {
   position: relative;
-  width: 800px;
-  height: 640px;
-  margin: 20px;
-  padding-top: 75%;
-  background-color: grey;
-} */
+  margin: 0px;
+  display: flex;
+  flex: 1 1 auto;
+  background-color: #105868;
+}
 
 #gamegrid {
   position: relative;
   margin: 20px;
-  width: 110vh;
-  height: 88vh;
+  width: 108vh;
+  height: 90vh;
   background-color: white;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
   z-index: 1;
+}
+
+#startBTN {
+  height: 50px;
+  align-self: center;
+  font-weight: bold;
+  background-color: yellowgreen;
 }
 
 .square {
