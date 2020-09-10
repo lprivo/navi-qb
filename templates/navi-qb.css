@@ -50,6 +50,33 @@ body {
   background-size: cover; /* Resize the background image to cover the entire container */
   background-color: red;
   /* transform: rotate(90deg); */
-  transition: all 1s ease;
+  transition: all 1.5s ease;
   z-index: 3;
+}
+
+.FArrow {
+  width: 40px;
+  height: 40px;
+  background-image: url('images/FArrow.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.RArrow {
+  width: 40px;
+  height: 40px;
+  background-image: url('images/RArrow.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.LArrow {
+  width: 40px;
+  height: 40px;
+  background-image: url('images/LArrow.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.empty {
+  width: 40px;
+  height: 40px;
 }

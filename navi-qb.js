@@ -46,6 +46,21 @@ const qbResize = (object, elem) => {
     currDimension = dimension.dim;
 }
 
+//Dragging command icons
+function allowDrop(event) {
+    event.preventDefault();
+}
+
+function drag(event) {
+    event.dataTransfer.setData("text", event.target.id);
+}
+
+function drop(event) {
+    event.preventDefault();
+    const data = event.dataTransfer.getData("text");
+    event.target.appendChild(document.getElementById(data));
+}
+
 const turn90 = (direction, object, elem) => {
     if (direction === "+") {
         object.orientation += 90;
@@ -135,7 +150,7 @@ const animQb = () => {
             setTimeout(function () {
                 console.log('i: ', i);
                 getNextCommand(item, dimension, qbObj, qb);
-            }, 3000 * i);
+            }, 2000 * i);
         })(i);
     }
     console.log('qbObj: ', qbObj);
