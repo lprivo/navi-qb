@@ -1,8 +1,7 @@
 
 let currDimension;
 let qbObj = { icon: "url('templates/images/nqb-icon.png')", dimension: 0, currTop: 0, newTop: 0, currLeft: 0, newLeft: 0, orientation: 0 };
-let commandList = ["+90", "-90", "forward", "right"];
-let history = [];
+// let history = [];
 
 const getDimension = () => {
     const grid = document.getElementById("gamegrid");
@@ -47,18 +46,95 @@ const qbResize = (object, elem) => {
 }
 
 //Dragging command icons
-function allowDrop(event) {
+const allowDrop = (event) => {
     event.preventDefault();
 }
 
-function drag(event) {
+const drag = (event) => {
     event.dataTransfer.setData("text", event.target.id);
 }
 
-function drop(event) {
+const drop = (event) => {
     event.preventDefault();
     const data = event.dataTransfer.getData("text");
     event.target.appendChild(document.getElementById(data));
+}
+
+const setCmdElem = (elem, grid) => {
+    const newSlot = document.createElement("div");
+
+    newSlot.setAttribute("id", elem);
+    newSlot.setAttribute("class", "cmdslot");
+    newSlot.setAttribute("ondrop", "drop(event)");
+    newSlot.setAttribute("ondragover", "allowDrop(event)");
+    if (i === 1) {
+        newSlot.setAttribute("style", "background-image: url('templates/images/StArrow.png')");
+    }
+    if (i >= 5 && i <= 8) {
+        newSlot.setAttribute("style", "transform: rotate(180deg)");
+    }
+    grid.appendChild(newSlot);
+}
+
+const cmdGridSetup = () => {
+    const cmdGrid = document.getElementById("cmdgrid");
+
+    for (i = 12; i >= 9; i--) {
+        const cmdElem = `cmd${i}`;
+        setCmdElem(cmdElem, cmdGrid);
+    };
+    for (i = 5; i <= 8; i++) {
+        const cmdElem = `cmd${i}`;
+        setCmdElem(cmdElem, cmdGrid);
+    };
+    for (i = 4; i >= 1; i--) {
+        const cmdElem = `cmd${i}`;
+        setCmdElem(cmdElem, cmdGrid);
+    };
+}
+
+const fnGridSetup = () => {
+    const fnGrid = document.getElementById("fngrid");
+
+    for (i = 4; i >= 1; i--) {
+        const fnElem = `fn${i}`;
+        setCmdElem(fnElem, fnGrid);
+    };
+}
+
+const setArrow = (obj, grid) => {
+    const newSlot = document.createElement("div");
+
+    newSlot.setAttribute("class", "iconslot");
+    newSlot.setAttribute("ondrop", "drop(event)");
+    newSlot.setAttribute("ondragover", "allowDrop(event)");
+    newSlot.appendChild(document.createElement("div"));
+    newSlot.childNodes[0].setAttribute("id", obj.id);
+    newSlot.childNodes[0].setAttribute("class", obj.class);
+    newSlot.childNodes[0].setAttribute("draggable", "true");
+    newSlot.childNodes[0].setAttribute("ondragstart", "drag(event)");
+    grid.appendChild(newSlot);
+}
+
+const arrowGridSetup = () => {
+    const arrowGrid = document.getElementById("arrowgrid");
+
+    for (i = 1; i <= 4; i++) {
+        const forward = { id: `forward${i}`, class: "forward" }
+        setArrow(forward, arrowGrid);
+    };
+    for (i = 1; i <= 4; i++) {
+        const turnLeft = { id: `turnleft${i}`, class: "turnleft" }
+        setArrow(turnLeft, arrowGrid);
+    };
+    for (i = 1; i <= 4; i++) {
+        const turnRight = { id: `turnright${i}`, class: "turnright" }
+        setArrow(turnRight, arrowGrid);
+    };
+    for (i = 1; i <= 4; i++) {
+        const negate = { id: `Negate${i}`, class: "negate" }
+        setArrow(negate, arrowGrid);
+    };
 }
 
 const turn90 = (direction, object, elem) => {
@@ -110,10 +186,10 @@ const goBackward = (comm, object, elem) => {
 const getNextCommand = (item, dimension, object, elem) => {
     let command;
 
-    if (item === "+90") {
+    if (item === "turnright") {
         command = turn90("+", object, elem);
     }
-    if (item === "-90") {
+    if (item === "turnleft") {
         command = turn90("-", object, elem);
     }
     if (item === "right") {
@@ -138,19 +214,38 @@ const getNextCommand = (item, dimension, object, elem) => {
     }
     return command;
 }
+
+const getCommandList = () => {
+    let commandList = [];
+    for (i = 1; i <= 12; i++) {
+        const cmd = document.getElementById(`cmd${i}`);
+        let child = cmd.childNodes[0];
+        if (child) {
+            let cmdClass = child.getAttribute("class");
+            commandList.push(cmdClass);
+        }
+        else {
+            break;
+        }
+    }
+
+    return commandList;
+}
+
 const animQb = () => {
     // console.log('animQb: clicked');
     const grid = document.getElementById("gamegrid");
     const dimension = getDimension(grid);
     const qb = document.getElementById("qb");
+    const commandList = getCommandList();
 
     for (let i = 0; i < commandList.length; i++) {
         const item = commandList[i];
-        (function (i) {         //Immediate Invoking Function Expression(IIFE)
-            setTimeout(function () {
+        ((i) => {         //Immediate Invoking Function Expression(IIFE)
+            setTimeout(() => {
                 console.log('i: ', i);
                 getNextCommand(item, dimension, qbObj, qb);
-            }, 2000 * i);
+            }, 3500 * i);
         })(i);
     }
     console.log('qbObj: ', qbObj);
@@ -165,6 +260,9 @@ window.onload = () => {
     currDimension = dimension;
 
     gridSetup(grid);
+    cmdGridSetup();
+    fnGridSetup();
+    arrowGridSetup();
     qbSetup(grid, dimension, qbObj, qb);
     addEventListener("resize", () => { qbResize(qbObj, qb) });
 }
