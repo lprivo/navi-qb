@@ -249,6 +249,7 @@ const getCommandList = (nr) => {
     let commandList = [];
     for (i = 1; i <= nr; i++) {
         console.log('nr: ', nr);
+        console.log('i: ', i);
         const cmd = document.getElementById(nr === 12 ? `cmd${i}` : `fn${i}`);
         let child = cmd.childNodes[0];
         if (child) {
@@ -258,6 +259,7 @@ const getCommandList = (nr) => {
                 for (j = 0; j < funkList.length; j++) {
                     commandList.push(funkList[j]);
                 }
+                i -= (j - 1);
             }
             else {
                 commandList.push(cmdClass);
