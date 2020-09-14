@@ -132,9 +132,13 @@ const arrowGridSetup = () => {
         setArrow(turnRight, arrowGrid);
     };
     for (i = 1; i <= 4; i++) {
-        const negate = { id: `Negate${i}`, class: "negate" }
+        const negate = { id: `negate${i}`, class: "negate" }
         setArrow(negate, arrowGrid);
     };
+    for (i = 1; i <= 4; i++) {
+        const func = { id: `func${i}`, class: "func" }
+        setArrow(func, arrowGrid);
+    }
 }
 
 const turn90 = (direction, object, elem) => {
@@ -165,7 +169,7 @@ const goLeft = (comm, object, elem) => {
     }
 }
 
-const goForward = (comm, object, elem) => {
+const goUp = (comm, object, elem) => {
     if (object.currTop <= object.newTop) {
         clearInterval(comm);
     } else {
@@ -174,7 +178,7 @@ const goForward = (comm, object, elem) => {
     }
 }
 
-const goBackward = (comm, object, elem) => {
+const goDown = (comm, object, elem) => {
     if (object.currTop >= object.newTop) {
         clearInterval(comm);
     } else {
@@ -192,44 +196,94 @@ const getNextCommand = (item, dimension, object, elem) => {
     if (item === "turnleft") {
         command = turn90("-", object, elem);
     }
-    if (item === "right") {
-        object.newLeft = object.currLeft + dimension;
-        const right = setInterval(() => { goRight(right, object, elem) }, 15);
-        command = goRight(right, object, elem);
-    }
-    if (item === "left") {
-        object.newLeft = object.currLeft + dimension;
-        const left = setInterval(() => { goLeft(left, object, elem) }, 15);
-        command = goLeft(left, object, elem);
-    }
     if (item === "forward") {
-        object.newTop = object.currTop - dimension;
-        const forward = setInterval(() => { goForward(forward, object, elem) }, 15);
-        command = goForward(forward, object, elem);
+        switch (object.orientation) {
+            case 0:
+                object.newTop = object.currTop - dimension;
+                const up = setInterval(() => { goUp(up, object, elem) }, 15);
+                command = goUp(up, object, elem);
+                break;
+            case 90:
+                object.newLeft = object.currLeft + dimension;
+                const right = setInterval(() => { goRight(right, object, elem) }, 15);
+                command = goRight(right, object, elem);
+                break;
+            case 180:
+                object.newTop = object.currTop + dimension;
+                const down = setInterval(() => { goDown(down, object, elem) }, 15);
+                command = goDown(down, object, elem);
+                break;
+            case -90:
+                object.newLeft = object.currLeft - dimension;
+                const left = setInterval(() => { goLeft(left, object, elem) }, 15);
+                command = goLeft(left, object, elem);
+        }
     }
     if (item === "backward") {
-        object.newTop = object.currTop + dimension;
-        const backward = setInterval(() => { goBackward(backward, object, elem) }, 15);
-        command = goBackward(backward, object, elem);
+        switch (object.orientation) {
+            case 0:
+                object.newTop = object.currTop + dimension;
+                const down = setInterval(() => { goDown(down, object, elem) }, 15);
+                command = goDown(down, object, elem);
+                break;
+            case 90:
+                object.newLeft = object.currLeft - dimension;
+                const left = setInterval(() => { goLeft(left, object, elem) }, 15);
+                command = goLeft(left, object, elem);
+                break;
+            case 180:
+                object.newTop = object.currTop - dimension;
+                const up = setInterval(() => { goUp(up, object, elem) }, 15);
+                command = goUp(up, object, elem);
+                break;
+            case -90:
+                object.newLeft = object.currLeft + dimension;
+                const right = setInterval(() => { goRight(right, object, elem) }, 15);
+                command = goRight(right, object, elem);
+        }
     }
     return command;
 }
 
-const getCommandList = () => {
+const getCommandList = (nr) => {
     let commandList = [];
-    for (i = 1; i <= 12; i++) {
-        const cmd = document.getElementById(`cmd${i}`);
+    for (i = 1; i <= nr; i++) {
+        console.log('nr: ', nr);
+        const cmd = document.getElementById(nr === 12 ? `cmd${i}` : `fn${i}`);
         let child = cmd.childNodes[0];
         if (child) {
             let cmdClass = child.getAttribute("class");
-            commandList.push(cmdClass);
+            if (cmdClass === "func") {
+                let funkList = getCommandList(4);
+                for (j = 0; j < funkList.length; j++) {
+                    commandList.push(funkList[j]);
+                }
+            }
+            else {
+                commandList.push(cmdClass);
+            }
         }
         else {
             break;
         }
     }
 
+    console.log('commandList: ', commandList);
     return commandList;
+}
+
+
+const negItem = (item) => {
+    switch (item) {
+        case "forward":
+            return "backward";
+        case "turnright":
+            return "turnleft";
+        case "turnleft":
+            return "turnright";
+        default:
+            return item;
+    }
 }
 
 const animQb = () => {
@@ -237,18 +291,31 @@ const animQb = () => {
     const grid = document.getElementById("gamegrid");
     const dimension = getDimension(grid);
     const qb = document.getElementById("qb");
-    const commandList = getCommandList();
+    const commandList = getCommandList(12);
 
     for (let i = 0; i < commandList.length; i++) {
-        const item = commandList[i];
-        ((i) => {         //Immediate Invoking Function Expression(IIFE)
-            setTimeout(() => {
-                console.log('i: ', i);
-                getNextCommand(item, dimension, qbObj, qb);
-            }, 3500 * i);
-        })(i);
+        let item = commandList[i];
+
+        if (item === "negate") {
+            i++;
+            item = negItem(commandList[i]);
+            ((i) => {         //Immediate Invoking Function Expression(IIFE)
+                setTimeout(() => {
+                    console.log('i: ', i, ' ', item);
+                    getNextCommand(item, dimension, qbObj, qb);
+                }, 3500 * i);
+            })(i);
+        }
+        else {
+            ((i) => {         //Immediate Invoking Function Expression(IIFE)
+                setTimeout(() => {
+                    console.log('i: ', i, ' ', item);
+                    getNextCommand(item, dimension, qbObj, qb);
+                }, 3500 * i);
+            })(i);
+        }
     }
-    console.log('qbObj: ', qbObj);
+    // console.log('qbObj: ', qbObj);
 }
 
 window.onload = () => {
