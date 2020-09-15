@@ -45,21 +45,6 @@ const qbResize = (object, elem) => {
     currDimension = dimension.dim;
 }
 
-//Dragging command icons
-const allowDrop = (event) => {
-    event.preventDefault();
-}
-
-const drag = (event) => {
-    event.dataTransfer.setData("text", event.target.id);
-}
-
-const drop = (event) => {
-    event.preventDefault();
-    const data = event.dataTransfer.getData("text");
-    event.target.appendChild(document.getElementById(data));
-}
-
 const setCmdElem = (elem, grid) => {
     const newSlot = document.createElement("div");
 
@@ -113,6 +98,8 @@ const setArrow = (obj, grid) => {
     newSlot.childNodes[0].setAttribute("class", obj.class);
     newSlot.childNodes[0].setAttribute("draggable", "true");
     newSlot.childNodes[0].setAttribute("ondragstart", "drag(event)");
+    newSlot.childNodes[0].setAttribute("ondragover", "null");
+    newSlot.childNodes[0].setAttribute("ondrop", "null");
     grid.appendChild(newSlot);
 }
 
@@ -138,6 +125,24 @@ const arrowGridSetup = () => {
     for (i = 1; i <= 4; i++) {
         const func = { id: `func${i}`, class: "func" }
         setArrow(func, arrowGrid);
+    }
+}
+
+//Dragging command icons
+const allowDrop = (event) => {
+    event.preventDefault();
+}
+
+const drag = (event) => {
+    event.dataTransfer.setData("text", event.target.id);
+}
+
+const drop = (event) => {
+    event.preventDefault();
+    const data = event.dataTransfer.getData("text");
+    let className = event.target.className;
+    if (className === ("cmdslot" || "iconslot")) {
+        event.target.appendChild(document.getElementById(data));
     }
 }
 
@@ -289,39 +294,6 @@ const getCommandList = () => {
 
     return commandList;
 }
-
-// const getCommandList = (nr) => {
-//     let commandList = [];
-//     for (i = 1; i <= nr; i++) {
-//         console.log('gcl-nr: ', nr);
-//         console.log('gcl-i: ', i);
-//         const cmd = document.getElementById(nr === 12 ? `cmd${i}` : `fn${i}`);
-//         let child = cmd.childNodes[0];
-//        let child = document.getElementById(nr === 12 ? `cmd${i}` : `fn${i}`).childNodes[0];
-//         if (child) {
-//             let cmdClass = child.getAttribute("class");
-//             console.log('cmdClass: ', cmdClass);
-//             if (cmdClass === "func") {
-//                 let funkList = getCommandList(4);
-//                 for (j = 0; j < funkList.length; j++) {
-//                     commandList.push(funkList[j]);
-//                 }
-//                 i -= j - 1;
-//             }
-//             else {
-//                 console.log('else');
-//                 commandList.push(cmdClass);
-//             }
-//         }
-//         else {
-//             break;
-//         }
-//     }
-
-//     console.log('commandList: ', commandList);
-//     return commandList;
-// }
-
 
 const negItem = (item) => {
     switch (item) {
