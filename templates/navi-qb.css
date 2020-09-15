@@ -108,7 +108,7 @@ body {
   margin-top: 20px;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
   z-index: 1;
 }
 
@@ -152,3 +152,11 @@ body {
   z-index: 3;
 }
 
+.func {
+  width: 40px;
+  height: 40px;
+  background-image: url('images/fnsign.png');
+  background-repeat: no-repeat;
+  background-size: cover;
+  z-index: 3;
+}
