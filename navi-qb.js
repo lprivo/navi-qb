@@ -245,21 +245,38 @@ const getNextCommand = (item, dimension, object, elem) => {
     return command;
 }
 
-const getCommandList = (nr) => {
-    let commandList = [];
-    for (i = 1; i <= nr; i++) {
-        console.log('nr: ', nr);
-        console.log('i: ', i);
-        const cmd = document.getElementById(nr === 12 ? `cmd${i}` : `fn${i}`);
-        let child = cmd.childNodes[0];
+const getFuncList = () => {
+    let funcList = [];
+    for (f = 1; f <= 4; f++) {
+        let child = document.getElementById(`fn${f}`).childNodes[0];
         if (child) {
             let cmdClass = child.getAttribute("class");
             if (cmdClass === "func") {
-                let funkList = getCommandList(4);
+                alert("Infinite loops not allowed!\nRemove function call from function list.");
+            }
+            else {
+                funcList.push(cmdClass);
+            }
+        }
+        else {
+            break;
+        }
+    }
+
+    return funcList;
+}
+
+const getCommandList = () => {
+    let commandList = [];
+    for (i = 1; i <= 12; i++) {
+        let child = document.getElementById(`cmd${i}`).childNodes[0];
+        if (child) {
+            let cmdClass = child.getAttribute("class");
+            if (cmdClass === "func") {
+                let funkList = getFuncList();
                 for (j = 0; j < funkList.length; j++) {
                     commandList.push(funkList[j]);
                 }
-                i -= (j - 1);
             }
             else {
                 commandList.push(cmdClass);
@@ -270,9 +287,40 @@ const getCommandList = (nr) => {
         }
     }
 
-    console.log('commandList: ', commandList);
     return commandList;
 }
+
+// const getCommandList = (nr) => {
+//     let commandList = [];
+//     for (i = 1; i <= nr; i++) {
+//         console.log('gcl-nr: ', nr);
+//         console.log('gcl-i: ', i);
+//         const cmd = document.getElementById(nr === 12 ? `cmd${i}` : `fn${i}`);
+//         let child = cmd.childNodes[0];
+//        let child = document.getElementById(nr === 12 ? `cmd${i}` : `fn${i}`).childNodes[0];
+//         if (child) {
+//             let cmdClass = child.getAttribute("class");
+//             console.log('cmdClass: ', cmdClass);
+//             if (cmdClass === "func") {
+//                 let funkList = getCommandList(4);
+//                 for (j = 0; j < funkList.length; j++) {
+//                     commandList.push(funkList[j]);
+//                 }
+//                 i -= j - 1;
+//             }
+//             else {
+//                 console.log('else');
+//                 commandList.push(cmdClass);
+//             }
+//         }
+//         else {
+//             break;
+//         }
+//     }
+
+//     console.log('commandList: ', commandList);
+//     return commandList;
+// }
 
 
 const negItem = (item) => {
@@ -289,11 +337,10 @@ const negItem = (item) => {
 }
 
 const animQb = () => {
-    // console.log('animQb: clicked');
     const grid = document.getElementById("gamegrid");
     const dimension = getDimension(grid);
     const qb = document.getElementById("qb");
-    const commandList = getCommandList(12);
+    const commandList = getCommandList();
 
     for (let i = 0; i < commandList.length; i++) {
         let item = commandList[i];
@@ -303,7 +350,6 @@ const animQb = () => {
             item = negItem(commandList[i]);
             ((i) => {         //Immediate Invoking Function Expression(IIFE)
                 setTimeout(() => {
-                    console.log('i: ', i, ' ', item);
                     getNextCommand(item, dimension, qbObj, qb);
                 }, 3500 * i);
             })(i);
@@ -311,13 +357,11 @@ const animQb = () => {
         else {
             ((i) => {         //Immediate Invoking Function Expression(IIFE)
                 setTimeout(() => {
-                    console.log('i: ', i, ' ', item);
                     getNextCommand(item, dimension, qbObj, qb);
                 }, 3500 * i);
             })(i);
         }
     }
-    // console.log('qbObj: ', qbObj);
 }
 
 window.onload = () => {
