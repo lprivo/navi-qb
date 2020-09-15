@@ -140,8 +140,9 @@ const drag = (event) => {
 const drop = (event) => {
     event.preventDefault();
     const data = event.dataTransfer.getData("text");
-    let className = event.target.className;
-    if (className === ("cmdslot" || "iconslot")) {
+    const className = event.target.className;
+    let empty = className === "cmdslot" || className === "iconslot";
+    if (empty) {
         event.target.appendChild(document.getElementById(data));
     }
 }
