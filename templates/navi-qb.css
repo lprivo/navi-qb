@@ -33,6 +33,8 @@ body {
   border: 1px solid #999;
   justify-content: center;
   align-content: center;
+  background-repeat: no-repeat;
+  background-size: cover;
   z-index: 2;
 }
 
@@ -40,7 +42,7 @@ body {
   position: absolute;
   background-repeat: no-repeat;
   background-size: cover; /* Resize the background image to cover the entire container */
-  background-color: red;
+  background-color: brown;
   /* transform: rotate(90deg); */
   transition: all 1.5s ease;
   z-index: 3;

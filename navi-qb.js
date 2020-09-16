@@ -1,6 +1,6 @@
 
 let currDimension;
-let qbObj = { icon: "url('templates/images/nqb-icon.png')", dimension: 0, currTop: 0, newTop: 0, currLeft: 0, newLeft: 0, orientation: 0 };
+let qbObj = { icon: "url('templates/images/nqb-icon_easy.png')", dimension: 0, currTop: 0, newTop: 0, currLeft: 0, newLeft: 0, orientation: 0 };
 // let history = [];
 
 const getDimension = () => {
@@ -15,13 +15,32 @@ const getNewDimension = () => {
     return newDimension;
 }
 
-const gridSetup = (grid) => {
+const getGridTiles = () => {
+    let gridTiles = [];
+    const gridTile = ["castle", "cornfield", "farm", "lake", "mountain", "shipwreck", "tree"];
+    for (let tile of gridTile) {
+        gridTiles.push(`url('templates/images/${tile}.png')`);
+    }
+    for (i = 0; i < 22; i++) {
+        gridTiles.push("url('templates/images/field.png')");
+    }
+    const shuffle = (a, l = a.length, r = ~~(Math.random() * l)) => l ? ([a[r], a[l - 1]] = [a[l - 1], a[r]], shuffle(a, l - 1))
+        : a;    // shuffling needs optimizing!
+    shuffle(gridTiles);
+
+    gridTiles = ["url('templates/images/pier.png')", ...gridTiles];
+
+    return gridTiles;
+}
+
+const gridSetup = (grid, tiles) => {
 
     for (i = 1; i <= 30; i++) {
         const newSquare = document.createElement("div");
 
         newSquare.setAttribute("id", `sq${i}`);
         newSquare.setAttribute("class", "square");
+        newSquare.setAttribute("style", `background-image:${tiles[i - 1]}`)
         newSquare.appendChild(document.createElement("p"));
         newSquare.childNodes[0].innerHTML = i;
         grid.appendChild(newSquare);
@@ -350,13 +369,14 @@ const animQb = () => {
 
 window.onload = () => {
     const grid = document.getElementById("gamegrid");
+    const gridTiles = getGridTiles();
     const qb = document.createElement("div");
     qb.setAttribute("id", "qb");
     const dimension = getDimension();
     qbObj.dimension = dimension;
     currDimension = dimension;
 
-    gridSetup(grid);
+    gridSetup(grid, gridTiles);
     cmdGridSetup();
     fnGridSetup();
     arrowGridSetup();
