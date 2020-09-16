@@ -161,7 +161,7 @@ const goRight = (comm, object, elem) => {
         clearInterval(comm);
     } else {
         object.currLeft++;
-        elem.style.left = `${object.currLeft}px`;
+        elem.style.left = `${object.currLeft.toFixed(2)}px`;
     }
 }
 
@@ -170,7 +170,7 @@ const goLeft = (comm, object, elem) => {
         clearInterval(comm);
     } else {
         object.currLeft--;
-        elem.style.left = `${object.currLeft}px`;
+        elem.style.left = `${object.currLeft.toFixed(2)}px`;
     }
 }
 
@@ -179,7 +179,7 @@ const goUp = (comm, object, elem) => {
         clearInterval(comm);
     } else {
         object.currTop--;
-        elem.style.top = `${object.currTop}px`;
+        elem.style.top = `${object.currTop.toFixed(2)}px`;
     }
 }
 
@@ -188,8 +188,16 @@ const goDown = (comm, object, elem) => {
         clearInterval(comm);
     } else {
         object.currTop++;
-        elem.style.top = `${object.currTop}px`;
+        elem.style.top = `${object.currTop.toFixed(2)}px`;
     }
+}
+
+const getDirection = (orientation) => {
+    let direction = (orientation / 90) % 4;
+    if (direction === 0) return "up";
+    if ([1, -3].includes(direction)) return "right";
+    if ([2, -2].includes(direction)) return "down";
+    if ([-1, 3].includes(direction)) return "left";
 }
 
 const getNextCommand = (item, dimension, object, elem) => {
@@ -202,25 +210,26 @@ const getNextCommand = (item, dimension, object, elem) => {
         command = turn90("-", object, elem);
     }
     if (item === "forward") {
-        switch (object.orientation) {
-            case 0:
+        const direction = getDirection(object.orientation);
+        switch (direction) {
+            case "up":
                 object.newTop = object.currTop - dimension;
-                const up = setInterval(() => { goUp(up, object, elem) }, 15);
+                const up = setInterval(() => { goUp(up, object, elem) }, 5);
                 command = goUp(up, object, elem);
                 break;
-            case 90:
+            case "right":
                 object.newLeft = object.currLeft + dimension;
-                const right = setInterval(() => { goRight(right, object, elem) }, 15);
+                const right = setInterval(() => { goRight(right, object, elem) }, 5);
                 command = goRight(right, object, elem);
                 break;
-            case 180:
+            case "down":
                 object.newTop = object.currTop + dimension;
-                const down = setInterval(() => { goDown(down, object, elem) }, 15);
+                const down = setInterval(() => { goDown(down, object, elem) }, 5);
                 command = goDown(down, object, elem);
                 break;
-            case -90:
+            case "left":
                 object.newLeft = object.currLeft - dimension;
-                const left = setInterval(() => { goLeft(left, object, elem) }, 15);
+                const left = setInterval(() => { goLeft(left, object, elem) }, 5);
                 command = goLeft(left, object, elem);
         }
     }
@@ -228,22 +237,22 @@ const getNextCommand = (item, dimension, object, elem) => {
         switch (object.orientation) {
             case 0:
                 object.newTop = object.currTop + dimension;
-                const down = setInterval(() => { goDown(down, object, elem) }, 15);
+                const down = setInterval(() => { goDown(down, object, elem) }, 5);
                 command = goDown(down, object, elem);
                 break;
             case 90:
                 object.newLeft = object.currLeft - dimension;
-                const left = setInterval(() => { goLeft(left, object, elem) }, 15);
+                const left = setInterval(() => { goLeft(left, object, elem) }, 5);
                 command = goLeft(left, object, elem);
                 break;
             case 180:
                 object.newTop = object.currTop - dimension;
-                const up = setInterval(() => { goUp(up, object, elem) }, 15);
+                const up = setInterval(() => { goUp(up, object, elem) }, 5);
                 command = goUp(up, object, elem);
                 break;
             case -90:
                 object.newLeft = object.currLeft + dimension;
-                const right = setInterval(() => { goRight(right, object, elem) }, 15);
+                const right = setInterval(() => { goRight(right, object, elem) }, 5);
                 command = goRight(right, object, elem);
         }
     }
@@ -274,6 +283,7 @@ const getFuncList = () => {
 const getCommandList = () => {
     let commandList = [];
     for (i = 1; i <= 12; i++) {
+        console.log('gcl-i: ', i);
         let child = document.getElementById(`cmd${i}`).childNodes[0];
         if (child) {
             let cmdClass = child.getAttribute("class");
@@ -292,6 +302,7 @@ const getCommandList = () => {
         }
     }
 
+    console.log('commandList: ', commandList);
     return commandList;
 }
 
@@ -323,14 +334,15 @@ const animQb = () => {
             ((i) => {         //Immediate Invoking Function Expression(IIFE)
                 setTimeout(() => {
                     getNextCommand(item, dimension, qbObj, qb);
-                }, 3500 * i);
+                }, 4000 * i);
             })(i);
         }
         else {
             ((i) => {         //Immediate Invoking Function Expression(IIFE)
                 setTimeout(() => {
+                    console.log('item: ', item);
                     getNextCommand(item, dimension, qbObj, qb);
-                }, 3500 * i);
+                }, 4000 * i);
             })(i);
         }
     }
