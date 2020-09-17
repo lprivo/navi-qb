@@ -11,18 +11,17 @@ const getDimension = () => {
 }
 
 const getNewDimension = () => {
-    const dimension = getDimension();
-    const newDimension = { dim: dimension, ratio: currDimension / dimension };
+    const newDimension = getDimension();
     return newDimension;
 }
 
 const getGridTiles = () => {
     let gridTiles = [];
-    const gridTile = ["castle", "cornfield", "farm", "lake", "mountain", "shipwreck", "tree"];
+    const gridTile = ["castle", "cornfield", "farm", "lake", "mountain", "shipwreck", "tree", "stonehenge"];
     for (let tile of gridTile) {
         gridTiles.push(`url('templates/images/${tile}.png')`);
     }
-    for (i = 0; i < 22; i++) {
+    for (i = 0; i < 21; i++) {
         gridTiles.push("url('templates/images/field.png')");
     }
     const shuffle = (a, l = a.length, r = ~~(Math.random() * l)) => l ? ([a[r], a[l - 1]] = [a[l - 1], a[r]], shuffle(a, l - 1))
@@ -58,11 +57,12 @@ const qbSetup = (grid, dimension, object, elem) => {
 
 const qbResize = (object, elem) => {
     const dimension = getNewDimension();
-    const top = object.currTop / dimension.ratio;
-    const left = object.currLeft / dimension.ratio;
-    elem.setAttribute("style", `width: ${dimension.dim}px; height: ${dimension.dim}px; background-image:${object.icon};
+    let ratio = dimension / currDimension;
+    let top = object.currTop * ratio;
+    let left = object.currLeft * ratio;
+    elem.setAttribute("style", `width: ${dimension}px; height: ${dimension}px; background-image:${object.icon};
     top: ${top}px; left: ${left}px; transform: rotate(${object.orientation}deg)`);
-    currDimension = dimension.dim;
+    currDimension = dimension;
 }
 
 const setCmdSlot = (slot, grid) => {
@@ -111,17 +111,15 @@ const setIcon = (cmd, offset) => {
     for (i = 1; i <= 4; i++) {
         const slot = document.getElementById(`iconslot${i + offset}`);
         const obj = { id: `${cmd}${i}`, class: `${cmd}` };
-        if (!slot.childNodes[0]) {
-            const newIcon = document.createElement("div");
+        const newIcon = document.createElement("div");
 
-            newIcon.setAttribute("id", obj.id);
-            newIcon.setAttribute("class", obj.class);
-            newIcon.setAttribute("draggable", "true");
-            newIcon.setAttribute("ondragstart", "drag(event)");
-            newIcon.setAttribute("ondragover", "null");
-            newIcon.setAttribute("ondrop", "null");
-            slot.appendChild(newIcon);
-        }
+        newIcon.setAttribute("id", obj.id);
+        newIcon.setAttribute("class", obj.class);
+        newIcon.setAttribute("draggable", "true");
+        newIcon.setAttribute("ondragstart", "drag(event)");
+        newIcon.setAttribute("ondblclick", "dblclick(event)");
+        newIcon.setAttribute("title", `iconslot${i + offset}`); //there might be a more appropriate way to store original parent info?
+        slot.appendChild(newIcon);
     }
 }
 
@@ -165,6 +163,27 @@ const drop = (event) => {
     let empty = ["cmdslot", "iconslot"].includes(event.target.className);
     if (empty) {
         event.target.appendChild(document.getElementById(data));
+    }
+}
+
+const findEmptySlot = () => {
+    for (i = 1; i <= 12; i++) {
+        let slot = document.getElementById(`cmd${i}`);
+        if (!slot.childNodes[0]) return slot;
+    }
+}
+
+const dblclick = (event) => {
+    event.preventDefault();
+    const icon = event.target;
+    const parent = document.getElementById(icon.title);
+    const slot = findEmptySlot();
+
+    if (icon.parentElement.className === "iconslot") {
+        slot.appendChild(icon);
+    }
+    else {
+        parent.appendChild(icon);
     }
 }
 
@@ -387,7 +406,10 @@ const resetCmd = () => {
         const fnSlot = document.getElementById(`fn${i}`);
         if (fnSlot.childNodes[0]) fnSlot.childNodes[0].remove();
     }
-
+    for (i = 1; i <= 20; i++) {
+        const iconSlot = document.getElementById(`iconslot${i}`);
+        if (iconSlot.childNodes[0]) iconSlot.childNodes[0].remove();
+    }
     iconSetup();
     stop = true;
 }
@@ -407,5 +429,9 @@ window.onload = () => {
     iconGridSetup();
     qbSetup(grid, dimension, qbObj, qb);
     addEventListener("resize", () => { qbResize(qbObj, qb) });
+    // let doit;
+    // onresize = () => {
+    //     clearTimeout(doit);
+    //     doit = setTimeout(qbResize(qbObj, qb), 1000);
+    // };
 }
-
