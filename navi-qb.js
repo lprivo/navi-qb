@@ -2,7 +2,7 @@
 let currDimension;
 let qbObj = { icon: "url('templates/images/nqb-icon_easy.png')", dimension: 0, currTop: 0, newTop: 0, currLeft: 0, newLeft: 0, orientation: 0 };
 let stop = false;
-// let history = [];
+let history = [];
 
 const getDimension = () => {
     const grid = document.getElementById("gamegrid");
@@ -331,6 +331,8 @@ const negItem = (item) => {
     switch (item) {
         case "forward":
             return "backward";
+        case "backward":
+            return "forward";
         case "turnright":
             return "turnleft";
         case "turnleft":
@@ -340,11 +342,12 @@ const negItem = (item) => {
     }
 }
 
-const animQb = () => {
+const animQb = (commandList) => {
     const grid = document.getElementById("gamegrid");
     const dimension = getDimension(grid);
     const qb = document.getElementById("qb");
-    const commandList = getCommandList();
+
+    if (stop) stop = false;
 
     for (let i = 0; i < commandList.length; i++) {
         let item = commandList[i];
@@ -356,11 +359,23 @@ const animQb = () => {
 
         ((i) => {         //Immediate Invoking Function Expression(IIFE)
             setTimeout(() => {
-                if (!stop) getNextCommand(item, dimension, qbObj, qb);
+                if (!stop) {
+                    getNextCommand(item, dimension, qbObj, qb);
+                    history.push(item);
+                };
             }, 4000 * i);
         })(i);
     }
 }
+
+const replay = () => {
+
+    history.reverse();
+    let playBack = history.map(negItem);
+    history = [];
+    animQb(playBack);
+}
+
 
 const resetCmd = () => {
 
