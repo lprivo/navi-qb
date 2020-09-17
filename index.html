@@ -19,10 +19,11 @@
                     <div id="cmdgrid"></div>
                     <div id="fngrid"></div>
                 </div>
-                <button id="startBTN" onclick="animQb()">START</button>
+                <button id="startBTN" onclick="animQb(getCommandList())">START</button>
             </div>
             <div id="icongrid"></div>
-            <button id="resetBTN" onclick="resetCmd()">RESET COMMANDS</button>
+            <button id="resetBTN" class="button" onclick="resetCmd()">RESET COMMANDS</button>
+            <button id="replayBTN" class="button" onclick="replay()">REPLAY</button>
         </div>
     </div>
 </body>
