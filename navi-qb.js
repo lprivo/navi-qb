@@ -179,7 +179,7 @@ const dblclick = (event) => {
     const parent = document.getElementById(icon.title);
     const slot = findEmptySlot();
 
-    if (icon.parentElement.className === "iconslot") {
+    if (icon.parentElement.id === icon.title) {
         slot.appendChild(icon);
     }
     else {
