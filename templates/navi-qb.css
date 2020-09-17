@@ -105,7 +105,15 @@ body {
   background-color: yellowgreen;
 }
 
-#arrowgrid {
+#resetBTN {
+  margin-top: 10px;
+  height: 30px;
+  align-self: stretch;
+  font-weight: bold;
+  background-color: rgb(100, 200, 200);
+}
+
+#icongrid {
   position: relative;
   margin-top: 20px;
   display: grid;
@@ -126,6 +134,7 @@ body {
   background-image: url('images/FArrow.png');
   background-repeat: no-repeat;
   background-size: cover;
+  cursor: pointer;
   z-index: 3;
 }
 .turnright {
@@ -134,6 +143,7 @@ body {
   background-image: url('images/RArrow.png');
   background-repeat: no-repeat;
   background-size: cover;
+  cursor: pointer;
   z-index: 3;
 }
 .turnleft {
@@ -142,6 +152,7 @@ body {
   background-image: url('images/LArrow.png');
   background-repeat: no-repeat;
   background-size: cover;
+  cursor: pointer;
   z-index: 3;
 }
 
@@ -151,6 +162,7 @@ body {
   background-image: url('images/Negate.png');
   background-repeat: no-repeat;
   background-size: cover;
+  cursor: pointer;
   z-index: 3;
 }
 
@@ -160,5 +172,6 @@ body {
   background-image: url('images/fnsign.png');
   background-repeat: no-repeat;
   background-size: cover;
+  cursor: pointer;
   z-index: 3;
 }

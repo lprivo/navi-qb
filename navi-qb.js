@@ -1,6 +1,7 @@
 
 let currDimension;
 let qbObj = { icon: "url('templates/images/nqb-icon_easy.png')", dimension: 0, currTop: 0, newTop: 0, currLeft: 0, newLeft: 0, orientation: 0 };
+let stop = false;
 // let history = [];
 
 const getDimension = () => {
@@ -64,10 +65,10 @@ const qbResize = (object, elem) => {
     currDimension = dimension.dim;
 }
 
-const setCmdElem = (elem, grid) => {
+const setCmdSlot = (slot, grid) => {
     const newSlot = document.createElement("div");
 
-    newSlot.setAttribute("id", elem);
+    newSlot.setAttribute("id", slot);
     newSlot.setAttribute("class", "cmdslot");
     newSlot.setAttribute("ondrop", "drop(event)");
     newSlot.setAttribute("ondragover", "allowDrop(event)");
@@ -84,16 +85,16 @@ const cmdGridSetup = () => {
     const cmdGrid = document.getElementById("cmdgrid");
 
     for (i = 12; i >= 9; i--) {
-        const cmdElem = `cmd${i}`;
-        setCmdElem(cmdElem, cmdGrid);
+        const cmdSlot = `cmd${i}`;
+        setCmdSlot(cmdSlot, cmdGrid);
     };
     for (i = 5; i <= 8; i++) {
-        const cmdElem = `cmd${i}`;
-        setCmdElem(cmdElem, cmdGrid);
+        const cmdSlot = `cmd${i}`;
+        setCmdSlot(cmdSlot, cmdGrid);
     };
     for (i = 4; i >= 1; i--) {
-        const cmdElem = `cmd${i}`;
-        setCmdElem(cmdElem, cmdGrid);
+        const cmdSlot = `cmd${i}`;
+        setCmdSlot(cmdSlot, cmdGrid);
     };
 }
 
@@ -101,50 +102,52 @@ const fnGridSetup = () => {
     const fnGrid = document.getElementById("fngrid");
 
     for (i = 4; i >= 1; i--) {
-        const fnElem = `fn${i}`;
-        setCmdElem(fnElem, fnGrid);
+        const fnSlot = `fn${i}`;
+        setCmdSlot(fnSlot, fnGrid);
     };
 }
 
-const setArrow = (obj, grid) => {
-    const newSlot = document.createElement("div");
+const setIcon = (cmd, offset) => {
+    for (i = 1; i <= 4; i++) {
+        const slot = document.getElementById(`iconslot${i + offset}`);
+        const obj = { id: `${cmd}${i}`, class: `${cmd}` };
+        if (!slot.childNodes[0]) {
+            const newIcon = document.createElement("div");
 
-    newSlot.setAttribute("class", "iconslot");
-    newSlot.setAttribute("ondrop", "drop(event)");
-    newSlot.setAttribute("ondragover", "allowDrop(event)");
-    newSlot.appendChild(document.createElement("div"));
-    newSlot.childNodes[0].setAttribute("id", obj.id);
-    newSlot.childNodes[0].setAttribute("class", obj.class);
-    newSlot.childNodes[0].setAttribute("draggable", "true");
-    newSlot.childNodes[0].setAttribute("ondragstart", "drag(event)");
-    newSlot.childNodes[0].setAttribute("ondragover", "null");
-    newSlot.childNodes[0].setAttribute("ondrop", "null");
-    grid.appendChild(newSlot);
-}
-
-const arrowGridSetup = () => {
-    const arrowGrid = document.getElementById("arrowgrid");
-
-    for (i = 1; i <= 4; i++) {
-        const forward = { id: `forward${i}`, class: "forward" }
-        setArrow(forward, arrowGrid);
-    };
-    for (i = 1; i <= 4; i++) {
-        const turnLeft = { id: `turnleft${i}`, class: "turnleft" }
-        setArrow(turnLeft, arrowGrid);
-    };
-    for (i = 1; i <= 4; i++) {
-        const turnRight = { id: `turnright${i}`, class: "turnright" }
-        setArrow(turnRight, arrowGrid);
-    };
-    for (i = 1; i <= 4; i++) {
-        const negate = { id: `negate${i}`, class: "negate" }
-        setArrow(negate, arrowGrid);
-    };
-    for (i = 1; i <= 4; i++) {
-        const func = { id: `func${i}`, class: "func" }
-        setArrow(func, arrowGrid);
+            newIcon.setAttribute("id", obj.id);
+            newIcon.setAttribute("class", obj.class);
+            newIcon.setAttribute("draggable", "true");
+            newIcon.setAttribute("ondragstart", "drag(event)");
+            newIcon.setAttribute("ondragover", "null");
+            newIcon.setAttribute("ondrop", "null");
+            slot.appendChild(newIcon);
+        }
     }
+}
+
+
+const iconSetup = () => {
+    setIcon("forward", 0);
+    setIcon("turnleft", 4);
+    setIcon("turnright", 8);
+    setIcon("negate", 12);
+    setIcon("func", 16);
+}
+
+const iconGridSetup = () => {
+    const iconGrid = document.getElementById("icongrid");
+
+    for (i = 1; i <= 20; i++) {
+        const newSlot = document.createElement("div");
+
+        newSlot.setAttribute("id", `iconslot${i}`);
+        newSlot.setAttribute("class", "iconslot");
+        newSlot.setAttribute("ondrop", "drop(event)");
+        newSlot.setAttribute("ondragover", "allowDrop(event)");
+        iconGrid.appendChild(newSlot);
+    }
+
+    iconSetup();
 }
 
 //Dragging command icons
@@ -302,7 +305,6 @@ const getFuncList = () => {
 const getCommandList = () => {
     let commandList = [];
     for (i = 1; i <= 12; i++) {
-        console.log('gcl-i: ', i);
         let child = document.getElementById(`cmd${i}`).childNodes[0];
         if (child) {
             let cmdClass = child.getAttribute("class");
@@ -321,7 +323,7 @@ const getCommandList = () => {
         }
     }
 
-    console.log('commandList: ', commandList);
+    // console.log('commandList: ', commandList);
     return commandList;
 }
 
@@ -350,21 +352,29 @@ const animQb = () => {
         if (item === "negate") {
             i++;
             item = negItem(commandList[i]);
-            ((i) => {         //Immediate Invoking Function Expression(IIFE)
-                setTimeout(() => {
-                    getNextCommand(item, dimension, qbObj, qb);
-                }, 4000 * i);
-            })(i);
         }
-        else {
-            ((i) => {         //Immediate Invoking Function Expression(IIFE)
-                setTimeout(() => {
-                    console.log('item: ', item);
-                    getNextCommand(item, dimension, qbObj, qb);
-                }, 4000 * i);
-            })(i);
-        }
+
+        ((i) => {         //Immediate Invoking Function Expression(IIFE)
+            setTimeout(() => {
+                if (!stop) getNextCommand(item, dimension, qbObj, qb);
+            }, 4000 * i);
+        })(i);
     }
+}
+
+const resetCmd = () => {
+
+    for (i = 1; i <= 12; i++) {
+        const cmdSlot = document.getElementById(`cmd${i}`);
+        if (cmdSlot.childNodes[0]) cmdSlot.childNodes[0].remove();
+    }
+    for (i = 1; i <= 4; i++) {
+        const fnSlot = document.getElementById(`fn${i}`);
+        if (fnSlot.childNodes[0]) fnSlot.childNodes[0].remove();
+    }
+
+    iconSetup();
+    stop = true;
 }
 
 window.onload = () => {
@@ -379,7 +389,7 @@ window.onload = () => {
     gridSetup(grid, gridTiles);
     cmdGridSetup();
     fnGridSetup();
-    arrowGridSetup();
+    iconGridSetup();
     qbSetup(grid, dimension, qbObj, qb);
     addEventListener("resize", () => { qbResize(qbObj, qb) });
 }
