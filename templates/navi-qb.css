@@ -105,7 +105,15 @@ body {
   background-color: yellowgreen;
 }
 
-#arrowgrid {
+#resetBTN {
+  margin-top: 10px;
+  height: 30px;
+  align-self: stretch;
+  font-weight: bold;
+  background-color: rgb(100, 200, 200);
+}
+
+#icongrid {
   position: relative;
   margin-top: 20px;
   display: grid;
