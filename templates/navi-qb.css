@@ -134,6 +134,7 @@ body {
   background-image: url('images/FArrow.png');
   background-repeat: no-repeat;
   background-size: cover;
+  cursor: pointer;
   z-index: 3;
 }
 .turnright {
@@ -142,6 +143,7 @@ body {
   background-image: url('images/RArrow.png');
   background-repeat: no-repeat;
   background-size: cover;
+  cursor: pointer;
   z-index: 3;
 }
 .turnleft {
@@ -150,6 +152,7 @@ body {
   background-image: url('images/LArrow.png');
   background-repeat: no-repeat;
   background-size: cover;
+  cursor: pointer;
   z-index: 3;
 }
 
@@ -159,6 +162,7 @@ body {
   background-image: url('images/Negate.png');
   background-repeat: no-repeat;
   background-size: cover;
+  cursor: pointer;
   z-index: 3;
 }
 
@@ -168,5 +172,6 @@ body {
   background-image: url('images/fnsign.png');
   background-repeat: no-repeat;
   background-size: cover;
+  cursor: pointer;
   z-index: 3;
 }

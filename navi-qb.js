@@ -1,6 +1,7 @@
 
 let currDimension;
 let qbObj = { icon: "url('templates/images/nqb-icon_easy.png')", dimension: 0, currTop: 0, newTop: 0, currLeft: 0, newLeft: 0, orientation: 0 };
+let stop = false;
 // let history = [];
 
 const getDimension = () => {
@@ -304,7 +305,6 @@ const getFuncList = () => {
 const getCommandList = () => {
     let commandList = [];
     for (i = 1; i <= 12; i++) {
-        console.log('gcl-i: ', i);
         let child = document.getElementById(`cmd${i}`).childNodes[0];
         if (child) {
             let cmdClass = child.getAttribute("class");
@@ -323,7 +323,7 @@ const getCommandList = () => {
         }
     }
 
-    console.log('commandList: ', commandList);
+    // console.log('commandList: ', commandList);
     return commandList;
 }
 
@@ -352,26 +352,17 @@ const animQb = () => {
         if (item === "negate") {
             i++;
             item = negItem(commandList[i]);
-            ((i) => {         //Immediate Invoking Function Expression(IIFE)
-                setTimeout(() => {
-                    getNextCommand(item, dimension, qbObj, qb);
-                }, 4000 * i);
-            })(i);
         }
-        else {
-            ((i) => {         //Immediate Invoking Function Expression(IIFE)
-                setTimeout(() => {
-                    console.log('item: ', item);
-                    getNextCommand(item, dimension, qbObj, qb);
-                }, 4000 * i);
-            })(i);
-        }
+
+        ((i) => {         //Immediate Invoking Function Expression(IIFE)
+            setTimeout(() => {
+                if (!stop) getNextCommand(item, dimension, qbObj, qb);
+            }, 4000 * i);
+        })(i);
     }
 }
 
 const resetCmd = () => {
-    // const cmdSlot = document.getElementsByClassName("cmdslot");
-    // console.log('cmdSlot: ', cmdSlot);
 
     for (i = 1; i <= 12; i++) {
         const cmdSlot = document.getElementById(`cmd${i}`);
@@ -383,6 +374,7 @@ const resetCmd = () => {
     }
 
     iconSetup();
+    stop = true;
 }
 
 window.onload = () => {
