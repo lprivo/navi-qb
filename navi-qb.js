@@ -117,7 +117,7 @@ const setIcon = (cmd, offset) => {
         newIcon.setAttribute("class", obj.class);
         newIcon.setAttribute("draggable", "true");
         newIcon.setAttribute("ondragstart", "drag(event)");
-        newIcon.setAttribute("ondblclick", "dblclick(event)");
+        newIcon.setAttribute("onclick", "sglClick(event)");
         newIcon.setAttribute("title", `iconslot${i + offset}`); //there might be a more appropriate way to store original parent info?
         slot.appendChild(newIcon);
     }
@@ -173,7 +173,7 @@ const findEmptySlot = () => {
     }
 }
 
-const dblclick = (event) => {
+const sglClick = (event) => {
     event.preventDefault();
     const icon = event.target;
     const parent = document.getElementById(icon.title);
