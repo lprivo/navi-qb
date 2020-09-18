@@ -55,7 +55,6 @@ p {
   background-repeat: no-repeat;
   background-size: cover; /* Resize the background image to cover the entire container */
   background-color: rgb(190, 150, 90);
-  /* transform: rotate(90deg); */
   transition: all 1.5s ease;
   z-index: 3;
 }
@@ -65,7 +64,7 @@ p {
   width: auto;
   height: 90vh;
   display: flex;
-  flex-flow: column nowrap;
+  flex-flow: column wrap;
 }
 
 #cmdcenter{
@@ -186,4 +185,17 @@ p {
   background-size: cover;
   cursor: pointer;
   z-index: 3;
+}
+
+@media screen and (min-width: 320px) and (max-width: 767px) and (orientation: portrait) {
+  html {
+    transform: rotate(-90deg);
+    transform-origin: left top;
+    width: 100vh;
+    height: 100vw;
+    overflow-x: scroll;
+    position: absolute;
+    top: 100%;
+    left: 0;
+  }
 }
