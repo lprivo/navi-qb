@@ -3,6 +3,7 @@ let currDimension;
 let qbObj = { icon: "url('templates/images/nqb-icon_easy.png')", dimension: 0, currTop: 0, newTop: 0, currLeft: 0, newLeft: 0, orientation: 0 };
 let stop = false;
 let history = [];
+let timerId;
 
 const getDimension = () => {
     const grid = document.getElementById("gamegrid");
@@ -58,10 +59,10 @@ const qbSetup = (grid, dimension, object, elem) => {
 const qbResize = (object, elem) => {
     const dimension = getNewDimension();
     let ratio = dimension / currDimension;
-    let top = object.currTop * ratio;
-    let left = object.currLeft * ratio;
+    object.currTop *= ratio;
+    object.currLeft *= ratio;
     elem.setAttribute("style", `width: ${dimension}px; height: ${dimension}px; background-image:${object.icon};
-    top: ${top}px; left: ${left}px; transform: rotate(${object.orientation}deg)`);
+    top: ${object.currTop}px; left: ${object.currLeft}px; transform: rotate(${object.orientation}deg)`);
     currDimension = dimension;
 }
 
@@ -414,6 +415,11 @@ const resetCmd = () => {
     stop = true;
 }
 
+const debounceFn = (func, delay) => {
+    clearTimeout(timerId);
+    timerId = setTimeout(func, delay);
+}
+
 window.onload = () => {
     const grid = document.getElementById("gamegrid");
     const gridTiles = getGridTiles();
@@ -428,10 +434,5 @@ window.onload = () => {
     fnGridSetup();
     iconGridSetup();
     qbSetup(grid, dimension, qbObj, qb);
-    addEventListener("resize", () => { qbResize(qbObj, qb) });
-    // let doit;
-    // onresize = () => {
-    //     clearTimeout(doit);
-    //     doit = setTimeout(qbResize(qbObj, qb), 1000);
-    // };
+    addEventListener("resize", () => { debounceFn(qbResize(qbObj, qb), 500) });
 }
