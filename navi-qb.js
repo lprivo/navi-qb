@@ -4,6 +4,7 @@ let qbObj = { icon: "url('templates/images/nqb-icon_easy.png')", dimension: 0, c
 let stop = false;
 let history = [];
 let timerId;
+let gridObjects = [];
 
 const getDimension = () => {
     const grid = document.getElementById("gamegrid");
@@ -11,9 +12,18 @@ const getDimension = () => {
     return dimension;
 }
 
-const getNewDimension = () => {
-    const newDimension = getDimension();
-    return newDimension;
+const setGridPositions = (dimension) => {
+    gridObjects = [];
+    for (i = 0; i < 5; i++) {
+        let idOffset = i * 6;
+        for (j = 1; j <= 6; j++) {
+            let gridObj = {};
+            gridObj.id = j + idOffset;
+            gridObj.top = i * dimension;
+            gridObj.left = (j - 1) * dimension;
+            gridObjects.push(gridObj);
+        }
+    }
 }
 
 const getGridTiles = () => {
@@ -57,7 +67,7 @@ const qbSetup = (grid, dimension, object, elem) => {
 }
 
 const qbResize = (object, elem) => {
-    const dimension = getNewDimension();
+    const dimension = getDimension();
     let ratio = dimension / currDimension;
     object.currTop *= ratio;
     object.currLeft *= ratio;
@@ -242,61 +252,98 @@ const getDirection = (orientation) => {
     if ([-1, 3].includes(direction)) return "left";
 }
 
-const getNextCommand = (item, dimension, object, elem) => {
+const outOfBounds = () => {
+    alert("Sorry, I am not allowed out of bounds!");
+    resetCmd();
+    return;
+}
+
+const negItem = (item) => {
+    switch (item) {
+        case "forward":
+            return "backward";
+        case "backward":
+            return "forward";
+        case "turnright":
+            return "turnleft";
+        case "turnleft":
+            return "turnright";
+        case "up":
+            return "down";
+        case "down":
+            return "up";
+        case "left":
+            return "right";
+        case "right":
+            return "left";
+        default:
+            console.log('item: ', item);
+            return item;
+    }
+}
+
+const orientForward = (direction, dimension, object, elem, item) => {
+    switch (direction) {
+        case "up":
+            object.newTop = object.currTop - dimension;
+            if (object.newTop <= 0) {
+                outOfBounds();
+                break;
+            }
+            const up = setInterval(() => { goUp(up, object, elem) }, 5);
+            command = goUp(up, object, elem);
+            history.push(item);
+            break;
+        case "down":
+            object.newTop = object.currTop + dimension;
+            if (object.newTop >= dimension * 4.5) {
+                outOfBounds();
+                break;
+            }
+            const down = setInterval(() => { goDown(down, object, elem) }, 5);
+            command = goDown(down, object, elem);
+            history.push(item);
+            break;
+        case "right":
+            object.newLeft = object.currLeft + dimension;
+            if (object.newLeft >= dimension * 6) {
+                outOfBounds();
+                break;
+            }
+            const right = setInterval(() => { goRight(right, object, elem) }, 5);
+            command = goRight(right, object, elem);
+            history.push(item);
+            break;
+        case "left":
+            if (object.newLeft <= 0) {
+                outOfBounds();
+                break;
+            }
+            object.newLeft = object.currLeft - dimension;
+            const left = setInterval(() => { goLeft(left, object, elem) }, 5);
+            command = goLeft(left, object, elem);
+            history.push(item);
+    }
+}
+
+const getNextCommand = (dimension, object, elem, item) => {
     let command;
 
     if (item === "turnright") {
         command = turn90("+", object, elem);
+        history.push(item);
     }
     if (item === "turnleft") {
         command = turn90("-", object, elem);
+        history.push(item);
     }
     if (item === "forward") {
         const direction = getDirection(object.orientation);
-        switch (direction) {
-            case "up":
-                object.newTop = object.currTop - dimension;
-                const up = setInterval(() => { goUp(up, object, elem) }, 5);
-                command = goUp(up, object, elem);
-                break;
-            case "right":
-                object.newLeft = object.currLeft + dimension;
-                const right = setInterval(() => { goRight(right, object, elem) }, 5);
-                command = goRight(right, object, elem);
-                break;
-            case "down":
-                object.newTop = object.currTop + dimension;
-                const down = setInterval(() => { goDown(down, object, elem) }, 5);
-                command = goDown(down, object, elem);
-                break;
-            case "left":
-                object.newLeft = object.currLeft - dimension;
-                const left = setInterval(() => { goLeft(left, object, elem) }, 5);
-                command = goLeft(left, object, elem);
-        }
+        command = orientForward(direction, dimension, object, elem, item);
     }
     if (item === "backward") {
-        switch (object.orientation) {
-            case 0:
-                object.newTop = object.currTop + dimension;
-                const down = setInterval(() => { goDown(down, object, elem) }, 5);
-                command = goDown(down, object, elem);
-                break;
-            case 90:
-                object.newLeft = object.currLeft - dimension;
-                const left = setInterval(() => { goLeft(left, object, elem) }, 5);
-                command = goLeft(left, object, elem);
-                break;
-            case 180:
-                object.newTop = object.currTop - dimension;
-                const up = setInterval(() => { goUp(up, object, elem) }, 5);
-                command = goUp(up, object, elem);
-                break;
-            case -90:
-                object.newLeft = object.currLeft + dimension;
-                const right = setInterval(() => { goRight(right, object, elem) }, 5);
-                command = goRight(right, object, elem);
-        }
+        const direction = getDirection(object.orientation);
+        command = orientForward(negItem(direction), dimension, object, elem, item);
     }
     return command;
 }
@@ -347,53 +394,42 @@ const getCommandList = () => {
     return commandList;
 }
 
-const negItem = (item) => {
-    switch (item) {
-        case "forward":
-            return "backward";
-        case "backward":
-            return "forward";
-        case "turnright":
-            return "turnleft";
-        case "turnleft":
-            return "turnright";
-        default:
-            return item;
-    }
+const toggleBTN = (button) => {
+    let elem = document.getElementById(button);
+    elem.disabled = !elem.disabled;
 }
 
-const animQb = (commandList) => {
+const animQb = (commandList, pb) => {
     const grid = document.getElementById("gamegrid");
-    const dimension = getDimension(grid);
+    const dimension = getDimension();
     const qb = document.getElementById("qb");
-
     if (stop) stop = false;
-
     for (let i = 0; i < commandList.length; i++) {
         let item = commandList[i];
-
         if (item === "negate") {
             i++;
             item = negItem(commandList[i]);
-        }
 
+        }
         ((i) => {         //Immediate Invoking Function Expression(IIFE)
             setTimeout(() => {
                 if (!stop) {
-                    getNextCommand(item, dimension, qbObj, qb);
-                    history.push(item);
+                    getNextCommand(dimension, qbObj, qb, item);
+                    if (pb) {
+                        toggleBTN("playbackBTN");
+                    }
                 };
             }, 4000 * i);
         })(i);
     }
 }
 
-const replay = () => {
-
+const playback = () => {
     history.reverse();
     let playBack = history.map(negItem);
+    animQb(playBack, false);
     history = [];
-    animQb(playBack);
+    toggleBTN("playbackBTN");
 }
 
 
@@ -430,9 +466,14 @@ window.onload = () => {
     currDimension = dimension;
 
     gridSetup(grid, gridTiles);
+    setGridPositions(dimension);
     cmdGridSetup();
     fnGridSetup();
     iconGridSetup();
     qbSetup(grid, dimension, qbObj, qb);
-    addEventListener("resize", () => { debounceFn(qbResize(qbObj, qb), 500) });
+    toggleBTN("playbackBTN");
+    addEventListener("resize", () => {
+        setGridPositions(getDimension());
+        debounceFn(qbResize(qbObj, qb), 500);
+    });
 }
