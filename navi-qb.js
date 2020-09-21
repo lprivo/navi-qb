@@ -5,8 +5,25 @@ let stop = false;
 let history = [];
 let timerId;
 let gridObjects = [];
+let target;
 
-const getDimension = () => {
+const debounceFn = (func, delay) => {
+    clearTimeout(timerId);
+    timerId = setTimeout(func, delay);
+
+}
+
+const toggleBTN = (button) => {
+    let elem = document.getElementById(button);
+    elem.disabled = !elem.disabled;
+}
+
+const toggleElement = (elem) => {
+    let element = document.getElementById(elem);
+    element.style.display === "block" ? element.style.display = "none" : element.style.display = "block";
+}
+
+function getDimension() {
     const grid = document.getElementById("gamegrid");
     const dimension = grid.clientHeight / 5;
     return dimension;
@@ -211,6 +228,67 @@ const sglClick = (event) => {
     }
 }
 
+const resetCmd = () => {
+
+    for (i = 1; i <= 12; i++) {
+        const cmdSlot = document.getElementById(`cmd${i}`);
+        if (cmdSlot.childNodes[0]) cmdSlot.childNodes[0].remove();
+    }
+    for (i = 1; i <= 4; i++) {
+        const fnSlot = document.getElementById(`fn${i}`);
+        if (fnSlot.childNodes[0]) fnSlot.childNodes[0].remove();
+    }
+    for (i = 1; i <= 20; i++) {
+        const iconSlot = document.getElementById(`iconslot${i}`);
+        if (iconSlot.childNodes[0]) iconSlot.childNodes[0].remove();
+    }
+    iconSetup();
+    stop = true;
+}
+
+const getMission = () => {
+    let mission = "";
+    let poi = [];
+
+    for (let i in gridObjects) {
+        if (gridObjects[i].icon !== "field") poi.push(i);
+    }
+
+    const n = Math.floor(Math.random() * poi.length);
+
+    target = poi[n];
+    mission = `Go to the ${gridObjects[poi[n]].icon.toUpperCase()}<br>at square Nr: ${gridObjects[poi[n]].id}!`;
+
+    return mission;
+}
+
+const showModal = (id, message) => {
+    const parent = document.getElementById("gamegrid");
+    let modal = document.createElement("div");
+
+    modal.setAttribute("id", `${id}`);
+    modal.setAttribute("class", "modal");
+    modal.setAttribute("style", "display: block");
+    modal.setAttribute("onclick", `toggleElement("${id}")`);
+    modal.appendChild(document.createElement("p"));
+    modal.childNodes[0].setAttribute("class", "modal-text");
+    modal.childNodes[0].innerHTML = message;
+    parent.appendChild(modal);
+}
+
+const checkArrived = (object) => {
+
+    let newTop = Math.round(object.currTop);
+    let newLeft = Math.round(object.currLeft);
+    let top = Math.round(gridObjects[target].top);
+    let left = Math.round(gridObjects[target].left);
+
+    if ((top - 10 < newTop && newTop < top + 10) && (left - 10 < newLeft && newLeft < left + 10)) {
+        debounceFn(showModal("donemodal", "Arrived.<br>Well Done!"), 3500);
+        resetCmd();
+    };
+}
+
 const turn90 = (direction, object, elem) => {
     if (direction === "+") {
         object.orientation += 90;
@@ -224,6 +302,7 @@ const turn90 = (direction, object, elem) => {
 const goRight = (comm, object, elem) => {
     if (object.currLeft >= object.newLeft) {
         clearInterval(comm);
+        checkArrived(object);
     } else {
         object.currLeft++;
         elem.style.left = `${object.currLeft.toFixed(2)}px`;
@@ -233,6 +312,7 @@ const goRight = (comm, object, elem) => {
 const goLeft = (comm, object, elem) => {
     if (object.currLeft <= object.newLeft) {
         clearInterval(comm);
+        checkArrived(object);
     } else {
         object.currLeft--;
         elem.style.left = `${object.currLeft.toFixed(2)}px`;
@@ -242,6 +322,7 @@ const goLeft = (comm, object, elem) => {
 const goUp = (comm, object, elem) => {
     if (object.currTop <= object.newTop) {
         clearInterval(comm);
+        checkArrived(object);
     } else {
         object.currTop--;
         elem.style.top = `${object.currTop.toFixed(2)}px`;
@@ -251,6 +332,7 @@ const goUp = (comm, object, elem) => {
 const goDown = (comm, object, elem) => {
     if (object.currTop >= object.newTop) {
         clearInterval(comm);
+        checkArrived(object);
     } else {
         object.currTop++;
         elem.style.top = `${object.currTop.toFixed(2)}px`;
@@ -298,7 +380,7 @@ const orientForward = (direction, dimension, object, elem, item) => {
     switch (direction) {
         case "up":
             object.newTop = object.currTop - dimension;
-            if (object.newTop < 0) {
+            if (object.newTop < -50) {
                 outOfBounds();
                 break;
             }
@@ -328,7 +410,7 @@ const orientForward = (direction, dimension, object, elem, item) => {
             break;
         case "left":
             object.newLeft = object.currLeft - dimension;
-            if (object.newLeft < 0) {
+            if (object.newLeft < -50) {
                 outOfBounds();
                 break;
             }
@@ -336,6 +418,7 @@ const orientForward = (direction, dimension, object, elem, item) => {
             command = goLeft(left, object, elem);
             history.push(item);
     }
+    checkArrived(object);
 }
 
 const getNextCommand = (dimension, object, elem, item) => {
@@ -406,16 +489,11 @@ const getCommandList = () => {
     return commandList;
 }
 
-const toggleBTN = (button) => {
-    let elem = document.getElementById(button);
-    elem.disabled = !elem.disabled;
-}
-
-const animQb = (commandList, pb) => {
-    const grid = document.getElementById("gamegrid");
+function animQb(commandList, pb) {
     const dimension = getDimension();
     const qb = document.getElementById("qb");
-    if (stop) stop = false;
+    if (stop)
+        stop = false;
     for (let i = 0; i < commandList.length; i++) {
         let item = commandList[i];
         if (item === "negate") {
@@ -423,7 +501,7 @@ const animQb = (commandList, pb) => {
             item = negItem(commandList[i]);
 
         }
-        ((i) => {         //Immediate Invoking Function Expression(IIFE)
+        ((i) => {
             setTimeout(() => {
                 if (!stop) {
                     getNextCommand(dimension, qbObj, qb, item);
@@ -444,44 +522,6 @@ const playback = () => {
     toggleBTN("playbackBTN");
 }
 
-const resetCmd = () => {
-
-    for (i = 1; i <= 12; i++) {
-        const cmdSlot = document.getElementById(`cmd${i}`);
-        if (cmdSlot.childNodes[0]) cmdSlot.childNodes[0].remove();
-    }
-    for (i = 1; i <= 4; i++) {
-        const fnSlot = document.getElementById(`fn${i}`);
-        if (fnSlot.childNodes[0]) fnSlot.childNodes[0].remove();
-    }
-    for (i = 1; i <= 20; i++) {
-        const iconSlot = document.getElementById(`iconslot${i}`);
-        if (iconSlot.childNodes[0]) iconSlot.childNodes[0].remove();
-    }
-    iconSetup();
-    stop = true;
-}
-
-const debounceFn = (func, delay) => {
-    clearTimeout(timerId);
-    timerId = setTimeout(func, delay);
-}
-
-const getMission = () => {
-    let mission = "";
-    let poi = [];
-
-    for (let i in gridObjects) {
-        if (gridObjects[i].icon !== "field") poi.push(i);
-    }
-
-    const n = Math.floor(Math.random() * poi.length);
-
-    mission = `Go to the ${gridObjects[poi[n]].icon.toUpperCase()}\nat squre Nr: ${gridObjects[poi[n]].id}!`;
-
-    return mission;
-}
-
 window.onload = () => {
     const grid = document.getElementById("gamegrid");
     const gridTiles = getGridTiles();
@@ -490,6 +530,7 @@ window.onload = () => {
     const dimension = getDimension();
     qbObj.dimension = dimension;
     currDimension = dimension;
+
 
     setGridPositions(dimension);
     gridSetup(grid, gridTiles);
@@ -500,7 +541,7 @@ window.onload = () => {
     toggleBTN("playbackBTN");
     addEventListener("resize", () => {
         setGridPositions(getDimension());
-        debounceFn(qbResize(qbObj, qb), 500);
+        debounceFn(() => qbResize(qbObj, qb), 500);
     });
-    alert(getMission());
+    debounceFn(() => { showModal("missionmodal", getMission()) }, 3000);
 }
