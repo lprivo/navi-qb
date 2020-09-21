@@ -24,22 +24,23 @@ const setGridPositions = (dimension) => {
             gridObjects.push(gridObj);
         }
     }
+    // console.log('gridObjects: ', gridObjects);
 }
 
 const getGridTiles = () => {
     let gridTiles = [];
-    const gridTile = ["castle", "cornfield", "farm", "lake", "mountain", "shipwreck", "tree", "stonehenge"];
+    const gridTile = ["castle", "cornfield", "farm", "lake", "mountain", "shipwreck", "stonehenge", "tree"];
     for (let tile of gridTile) {
-        gridTiles.push(`url('templates/images/${tile}.png')`);
+        gridTiles.push(`${tile}`);
     }
     for (i = 0; i < 21; i++) {
-        gridTiles.push("url('templates/images/field.png')");
+        gridTiles.push("field");
     }
     const shuffle = (a, l = a.length, r = ~~(Math.random() * l)) => l ? ([a[r], a[l - 1]] = [a[l - 1], a[r]], shuffle(a, l - 1))
         : a;    // shuffling needs optimizing!
     shuffle(gridTiles);
 
-    gridTiles = ["url('templates/images/pier.png')", ...gridTiles];
+    gridTiles = ["pier", ...gridTiles];
 
     return gridTiles;
 }
@@ -51,18 +52,30 @@ const gridSetup = (grid, tiles) => {
 
         newSquare.setAttribute("id", `sq${i}`);
         newSquare.setAttribute("class", "square");
-        newSquare.setAttribute("style", `background-image:${tiles[i - 1]}`)
+        newSquare.setAttribute("style", `background-image: url('templates/images/${tiles[i - 1]}.png')`);
         newSquare.appendChild(document.createElement("p"));
         newSquare.childNodes[0].innerHTML = i;
         grid.appendChild(newSquare);
+        gridObjects[i - 1].icon = `${tiles[i - 1]}`;
     };
 }
 
 const qbSetup = (grid, dimension, object, elem) => {
+    let fields = [];
+    for (let i in gridObjects) {
+        if (gridObjects[i].icon === "field") fields.push(i);
+    }
+    const n = Math.floor(Math.random() * fields.length);
+    let orientation = [0, 90, 180, -90];
+    const o = Math.floor(Math.random() * orientation.length);
+
     // object.icon = ;
     object.dimension = dimension;
-    object.currTop = dimension * 4;
-    elem.setAttribute("style", `width: ${dimension}px; height: ${dimension}px; background-image:${object.icon}; top: ${object.currTop}px`);
+    object.currTop = gridObjects[fields[n]].top;
+    object.currLeft = gridObjects[fields[n]].left;
+    object.orientation = orientation[o];
+    elem.setAttribute("style", `width: ${dimension}px; height: ${dimension}px; background-image:${object.icon};
+    top: ${object.currTop}px; left: ${object.currLeft}px; transform: rotate(${object.orientation}deg)`);
     grid.appendChild(elem);
 }
 
@@ -277,7 +290,6 @@ const negItem = (item) => {
         case "right":
             return "left";
         default:
-            console.log('item: ', item);
             return item;
     }
 }
@@ -286,7 +298,7 @@ const orientForward = (direction, dimension, object, elem, item) => {
     switch (direction) {
         case "up":
             object.newTop = object.currTop - dimension;
-            if (object.newTop <= 0) {
+            if (object.newTop < 0) {
                 outOfBounds();
                 break;
             }
@@ -296,7 +308,7 @@ const orientForward = (direction, dimension, object, elem, item) => {
             break;
         case "down":
             object.newTop = object.currTop + dimension;
-            if (object.newTop >= dimension * 4.5) {
+            if (object.newTop > dimension * 4.5) {
                 outOfBounds();
                 break;
             }
@@ -306,7 +318,7 @@ const orientForward = (direction, dimension, object, elem, item) => {
             break;
         case "right":
             object.newLeft = object.currLeft + dimension;
-            if (object.newLeft >= dimension * 6) {
+            if (object.newLeft > dimension * 5.5) {
                 outOfBounds();
                 break;
             }
@@ -315,11 +327,11 @@ const orientForward = (direction, dimension, object, elem, item) => {
             history.push(item);
             break;
         case "left":
-            if (object.newLeft <= 0) {
+            object.newLeft = object.currLeft - dimension;
+            if (object.newLeft < 0) {
                 outOfBounds();
                 break;
             }
-            object.newLeft = object.currLeft - dimension;
             const left = setInterval(() => { goLeft(left, object, elem) }, 5);
             command = goLeft(left, object, elem);
             history.push(item);
@@ -432,7 +444,6 @@ const playback = () => {
     toggleBTN("playbackBTN");
 }
 
-
 const resetCmd = () => {
 
     for (i = 1; i <= 12; i++) {
@@ -456,6 +467,21 @@ const debounceFn = (func, delay) => {
     timerId = setTimeout(func, delay);
 }
 
+const getMission = () => {
+    let mission = "";
+    let poi = [];
+
+    for (let i in gridObjects) {
+        if (gridObjects[i].icon !== "field") poi.push(i);
+    }
+
+    const n = Math.floor(Math.random() * poi.length);
+
+    mission = `Go to the ${gridObjects[poi[n]].icon.toUpperCase()}\nat squre Nr: ${gridObjects[poi[n]].id}!`;
+
+    return mission;
+}
+
 window.onload = () => {
     const grid = document.getElementById("gamegrid");
     const gridTiles = getGridTiles();
@@ -465,8 +491,8 @@ window.onload = () => {
     qbObj.dimension = dimension;
     currDimension = dimension;
 
-    gridSetup(grid, gridTiles);
     setGridPositions(dimension);
+    gridSetup(grid, gridTiles);
     cmdGridSetup();
     fnGridSetup();
     iconGridSetup();
@@ -476,4 +502,5 @@ window.onload = () => {
         setGridPositions(getDimension());
         debounceFn(qbResize(qbObj, qb), 500);
     });
+    alert(getMission());
 }
