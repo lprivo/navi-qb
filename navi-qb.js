@@ -264,27 +264,33 @@ const getMission = () => {
 
 const showModal = (id, message) => {
     const parent = document.getElementById("gamegrid");
-    let modal = document.createElement("div");
+    let lastElem = parent.lastChild.id;
 
-    modal.setAttribute("id", `${id}`);
-    modal.setAttribute("class", "modal");
-    modal.setAttribute("style", "display: block");
-    modal.setAttribute("onclick", `toggleElement("${id}")`);
-    modal.appendChild(document.createElement("p"));
-    modal.childNodes[0].setAttribute("class", "modal-text");
-    modal.childNodes[0].innerHTML = message;
-    parent.appendChild(modal);
+    if (lastElem !== id) {
+        let modal = document.createElement("div");
+
+        modal.setAttribute("id", `${id}`);
+        modal.setAttribute("class", "modal");
+        modal.setAttribute("style", "display: block");
+        modal.setAttribute("onclick", `toggleElement("${id}")`);
+        modal.appendChild(document.createElement("p"));
+        modal.childNodes[0].setAttribute("class", "modal-text");
+        modal.childNodes[0].innerHTML = message;
+        parent.appendChild(modal);
+    }
 }
 
-const checkArrived = (object) => {
+const checkArrived = (object, elem) => {
 
-    let newTop = Math.round(object.currTop);
-    let newLeft = Math.round(object.currLeft);
+    let currTop = Math.round(object.currTop);
+    let currLeft = Math.round(object.currLeft);
     let top = Math.round(gridObjects[target].top);
     let left = Math.round(gridObjects[target].left);
 
-    if ((top - 10 < newTop && newTop < top + 10) && (left - 10 < newLeft && newLeft < left + 10)) {
-        debounceFn(showModal("donemodal", "Arrived.<br>Well Done!"), 3500);
+    if ((top - 10 < currTop && currTop < top + 10) && (left - 10 < currLeft && currLeft < left + 10)) {
+        debounceFn(showModal("donemodal", "Arrived.<br>Well Done!"), 4500);
+        object.icon = "url('templates/images/nqb-icon_happy.png')";
+        elem.style.backgroundImage = object.icon;
         resetCmd();
     };
 }
@@ -302,7 +308,7 @@ const turn90 = (direction, object, elem) => {
 const goRight = (comm, object, elem) => {
     if (object.currLeft >= object.newLeft) {
         clearInterval(comm);
-        checkArrived(object);
+        checkArrived(object, elem);
     } else {
         object.currLeft++;
         elem.style.left = `${object.currLeft.toFixed(2)}px`;
@@ -312,7 +318,7 @@ const goRight = (comm, object, elem) => {
 const goLeft = (comm, object, elem) => {
     if (object.currLeft <= object.newLeft) {
         clearInterval(comm);
-        checkArrived(object);
+        checkArrived(object, elem);
     } else {
         object.currLeft--;
         elem.style.left = `${object.currLeft.toFixed(2)}px`;
@@ -322,7 +328,7 @@ const goLeft = (comm, object, elem) => {
 const goUp = (comm, object, elem) => {
     if (object.currTop <= object.newTop) {
         clearInterval(comm);
-        checkArrived(object);
+        checkArrived(object, elem);
     } else {
         object.currTop--;
         elem.style.top = `${object.currTop.toFixed(2)}px`;
@@ -332,7 +338,7 @@ const goUp = (comm, object, elem) => {
 const goDown = (comm, object, elem) => {
     if (object.currTop >= object.newTop) {
         clearInterval(comm);
-        checkArrived(object);
+        checkArrived(object, elem);
     } else {
         object.currTop++;
         elem.style.top = `${object.currTop.toFixed(2)}px`;
@@ -505,19 +511,19 @@ function animQb(commandList, pb) {
             setTimeout(() => {
                 if (!stop) {
                     getNextCommand(dimension, qbObj, qb, item);
-                    if (pb) {
-                        toggleBTN("playbackBTN");
-                    }
                 };
             }, 4000 * i);
         })(i);
+    }
+    if (!pb) {
+        toggleBTN("playbackBTN");
     }
 }
 
 const playback = () => {
     history.reverse();
     let playBack = history.map(negItem);
-    animQb(playBack, false);
+    animQb(playBack, true);
     history = [];
     toggleBTN("playbackBTN");
 }
