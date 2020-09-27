@@ -14,7 +14,6 @@ body {
   min-width: 890px;
   min-height: 580px;
   display: flex;
-  flex: 1 1 auto;
   background-color: #105868;
 }
 
@@ -148,9 +147,10 @@ p {
 
 #icongrid {
   position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  max-width: 190px;
   z-index: 1;
 }
 
