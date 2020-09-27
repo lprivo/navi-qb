@@ -35,21 +35,6 @@ function getDimension() {
     return dimension;
 }
 
-const setGridPositions = (dimension) => {
-    gridObjects = [];
-    for (i = 0; i < 5; i++) {
-        let idOffset = i * 6;
-        for (j = 1; j <= 6; j++) {
-            let gridObj = {};
-            gridObj.id = j + idOffset;
-            gridObj.top = i * dimension;
-            gridObj.left = (j - 1) * dimension;
-            gridObjects.push(gridObj);
-        }
-    }
-    // console.log('gridObjects: ', gridObjects);
-}
-
 const getGridTiles = () => {
     let gridTiles = [];
     const gridTile = ["castle", "cornfield", "farm", "lake", "mountain", "shipwreck", "stonehenge", "tree"];
@@ -79,8 +64,21 @@ const gridSetup = (grid, tiles) => {
         newSquare.appendChild(document.createElement("p"));
         newSquare.childNodes[0].innerHTML = i;
         grid.appendChild(newSquare);
-        gridObjects[i - 1].icon = `${tiles[i - 1]}`;
+        let gridObj = {};
+        gridObj.id = i;
+        gridObj.icon = `${tiles[i - 1]}`;
+        gridObjects.push(gridObj);
     };
+}
+
+const setGridPositions = (dimension) => {
+    for (i = 0; i < 5; i++) {
+        let idOffset = i * 6;
+        for (j = 0; j < 6; j++) {
+            gridObjects[j + idOffset].top = i * dimension;
+            gridObjects[j + idOffset].left = j * dimension;
+        }
+    }
 }
 
 const qbSetup = (grid, dimension, object, elem) => {
@@ -114,6 +112,7 @@ const qbResize = (object, elem) => {
     object.currLeft *= ratio;
     elem.setAttribute("style", `width: ${dimension}px; height: ${dimension}px; background-image:${object.icon};
     top: ${object.currTop}px; left: ${object.currLeft}px; transform: rotate(${object.orientation}deg)`);
+    elem.childNodes[0].setAttribute("style", `width: ${dimension}px; height: ${dimension}px; display: none`);
     currDimension = dimension;
 }
 
@@ -502,7 +501,6 @@ const getCommandList = () => {
         }
     }
 
-    // console.log('commandList: ', commandList);
     return commandList;
 }
 
@@ -553,8 +551,8 @@ window.onload = () => {
     currDimension = dimension;
 
 
-    setGridPositions(dimension);
     gridSetup(grid, gridTiles);
+    setGridPositions(dimension);
     cmdGridSetup();
     fnGridSetup();
     iconGridSetup();
