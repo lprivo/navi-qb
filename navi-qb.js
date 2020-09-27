@@ -1,3 +1,4 @@
+// import toggleBTN from "./templates/utilities.js";
 
 let currDimension;
 let qbObj = { icon: "url('templates/images/nqb-icon_easy.png')", dimension: 0, currTop: 0, newTop: 0, currLeft: 0, newLeft: 0, orientation: 0 };
@@ -10,7 +11,6 @@ let target;
 const debounceFn = (func, delay) => {
     clearTimeout(timerId);
     timerId = setTimeout(func, delay);
-
 }
 
 const toggleBTN = (button) => {
@@ -21,6 +21,12 @@ const toggleBTN = (button) => {
 const toggleElement = (elem) => {
     let element = document.getElementById(elem);
     element.style.display === "block" ? element.style.display = "none" : element.style.display = "block";
+}
+
+const removeElement = (id) => {
+    // Removes an element from the document
+    let element = document.getElementById(id);
+    element.parentNode.removeChild(element);
 }
 
 function getDimension() {
@@ -85,6 +91,7 @@ const qbSetup = (grid, dimension, object, elem) => {
     const n = Math.floor(Math.random() * fields.length);
     let orientation = [0, 90, 180, -90];
     const o = Math.floor(Math.random() * orientation.length);
+    const topImg = document.createElement("img");
 
     // object.icon = ;
     object.dimension = dimension;
@@ -93,6 +100,10 @@ const qbSetup = (grid, dimension, object, elem) => {
     object.orientation = orientation[o];
     elem.setAttribute("style", `width: ${dimension}px; height: ${dimension}px; background-image:${object.icon};
     top: ${object.currTop}px; left: ${object.currLeft}px; transform: rotate(${object.orientation}deg)`);
+    topImg.setAttribute("id", "topimg");
+    topImg.setAttribute("src", "./templates/images/nqb-icon_happy.png");
+    topImg.setAttribute("style", `width: ${dimension}px; height: ${dimension}px; display: none`);
+    elem.appendChild(topImg);
     grid.appendChild(elem);
 }
 
@@ -257,7 +268,8 @@ const getMission = () => {
     const n = Math.floor(Math.random() * poi.length);
 
     target = poi[n];
-    mission = `Go to the ${gridObjects[poi[n]].icon.toUpperCase()}<br>at square Nr: ${gridObjects[poi[n]].id}!`;
+    mission = `Go to the ${gridObjects[target].icon.toUpperCase()}<br>at square Nr: ${gridObjects[target].id}!`;
+    document.getElementById("topimg").style.display = "none";
 
     return mission;
 }
@@ -272,7 +284,7 @@ const showModal = (id, message) => {
         modal.setAttribute("id", `${id}`);
         modal.setAttribute("class", "modal");
         modal.setAttribute("style", "display: block");
-        modal.setAttribute("onclick", `toggleElement("${id}")`);
+        modal.setAttribute("onclick", `removeElement('${id}')`);
         modal.appendChild(document.createElement("p"));
         modal.childNodes[0].setAttribute("class", "modal-text");
         modal.childNodes[0].innerHTML = message;
@@ -289,8 +301,7 @@ const checkArrived = (object, elem) => {
 
     if ((top - 10 < currTop && currTop < top + 10) && (left - 10 < currLeft && currLeft < left + 10)) {
         debounceFn(showModal("donemodal", "Arrived.<br>Well Done!"), 4500);
-        object.icon = "url('templates/images/nqb-icon_happy.png')";
-        elem.style.backgroundImage = object.icon;
+        elem.childNodes[0].style.display = "block";
         resetCmd();
     };
 }
@@ -424,7 +435,7 @@ const orientForward = (direction, dimension, object, elem, item) => {
             command = goLeft(left, object, elem);
             history.push(item);
     }
-    checkArrived(object);
+    // checkArrived(object, elem);
 }
 
 const getNextCommand = (dimension, object, elem, item) => {
@@ -500,10 +511,11 @@ function animQb(commandList, pb) {
     const qb = document.getElementById("qb");
     if (stop)
         stop = false;
+    toggleBTN("startBTN");
     for (let i = 0; i < commandList.length; i++) {
         let item = commandList[i];
         if (item === "negate") {
-            i++;
+            ++i;
             item = negItem(commandList[i]);
 
         }
@@ -511,6 +523,9 @@ function animQb(commandList, pb) {
             setTimeout(() => {
                 if (!stop) {
                     getNextCommand(dimension, qbObj, qb, item);
+                };
+                if (i + 1 === commandList.length) {
+                    toggleBTN("startBTN");
                 };
             }, 4000 * i);
         })(i);
