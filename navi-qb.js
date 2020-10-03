@@ -66,7 +66,7 @@ const gridSetup = (grid, tiles) => {
         grid.appendChild(newSquare);
         let gridObj = {};
         gridObj.id = i;
-        gridObj.icon = `${tiles[i - 1]}`;
+        gridObj.name = `${tiles[i - 1]}`;
         gridObjects.push(gridObj);
     };
 }
@@ -84,7 +84,7 @@ const setGridPositions = (dimension) => {
 const qbSetup = (grid, dimension, object, elem) => {
     let fields = [];
     for (let i in gridObjects) {
-        if (gridObjects[i].icon === "field") fields.push(i);
+        if (gridObjects[i].name === "field") fields.push(i);
     }
     const n = Math.floor(Math.random() * fields.length);
     let orientation = [0, 90, 180, -90];
@@ -256,18 +256,28 @@ const resetCmd = () => {
     stop = true;
 }
 
-const getMission = () => {
+const getMission = (arg) => {
     let mission = "";
     let poi = [];
+    const emoji = '<img class="emoji" src="./templates/images/nqb-icon_emoji.png">'; //<img class="emoji" src="//i.stack.imgur.com/iUDpH.png">
 
     for (let i in gridObjects) {
-        if (gridObjects[i].icon !== "field") poi.push(i);
+        if (gridObjects[i].name !== "field") poi.push(i);
     }
 
     const n = Math.floor(Math.random() * poi.length);
 
     target = poi[n];
-    mission = `Go to the ${gridObjects[target].icon.toUpperCase()}<br>at square Nr: ${gridObjects[target].id}!`;
+    if (arg) {
+        mission = `Hi, I'm ${emoji}, please take me to the
+        <br>${gridObjects[target].name.toUpperCase()}
+        <br>at square Nr: ${gridObjects[target].id}!`;
+    }
+    else {
+        mission = `Please take me to the
+        <br>${gridObjects[target].name.toUpperCase()}
+        <br>at square Nr: ${gridObjects[target].id}!`;
+    }
     document.getElementById("topimg").style.display = "none";
 
     return mission;
@@ -562,5 +572,5 @@ window.onload = () => {
         setGridPositions(getDimension());
         debounceFn(() => qbResize(qbObj, qb), 500);
     });
-    debounceFn(() => { showModal("missionmodal", getMission()) }, 3000);
+    debounceFn(() => { showModal("missionmodal", getMission(true)) }, 3000);
 }
